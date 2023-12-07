@@ -2,6 +2,8 @@
 
 #include <core/window.h>
 #include <ui/imgui.h>
+#include <render/renderer.h>
+#include <entities/entitymanager.h>
 
 namespace Core {
     class Engine {
@@ -22,5 +24,7 @@ namespace Core {
         // singletons
         Core::Window* window;
         UI::IMGUI* imgui;
+        Render::IRenderer* renderer;
+        Entity::EntityManager* entityManager;
     };
 }

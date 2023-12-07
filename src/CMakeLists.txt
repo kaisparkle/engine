@@ -6,8 +6,16 @@ add_executable(${CMAKE_PROJECT_NAME}
         core/window.h
         ui/imgui.cpp
         ui/imgui.h
+        render/renderer.h
         render/gl.cpp
-        render/gl.h)
+        render/gl.h
+        entities/entity.cpp
+        entities/entity.h
+        entities/entitymanager.cpp
+        entities/entitymanager.h
+        components/component.h
+        components/transform.cpp
+        components/transform.h)
 
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>")
 

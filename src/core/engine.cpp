@@ -2,7 +2,9 @@
 #include <render/gl.h>
 #include <core/window.h>
 #include <ui/imgui.h>
+#include <render/gl.h>
 #include <core/engine.h>
+#include <components/transform.h>
 
 namespace Core {
     // create the Engine singleton
@@ -32,9 +34,10 @@ namespace Core {
         window->init();
         imgui = UI::IMGUI::create_instance();
         imgui->init();
-
-        // get our opengl function pointers
-        Render::GL::get_function_pointers();
+        renderer = Render::RendererGL::create_instance();
+        renderer->init();
+        entityManager = Entity::EntityManager::create_instance();
+        entityManager->init();
     }
 
     // clean up the Engine
@@ -44,6 +47,10 @@ namespace Core {
         UI::IMGUI::destroy_instance();
         window->cleanup();
         Core::Window::destroy_instance();
+        renderer->cleanup();
+        Render::RendererGL::destroy_instance();
+        entityManager->cleanup();
+        Entity::EntityManager::destroy_instance();
     }
 
     // run the Engine, starts the game loop
@@ -54,7 +61,7 @@ namespace Core {
             window->poll_events();
 
             // update viewport, clear buffers
-            Render::GL::viewport_clear(window->get_window_width(), window->get_window_height());
+            renderer->viewport_clear(window->get_window_width(), window->get_window_height());
 
             // tick subsystems
             imgui->tick();
