@@ -17,8 +17,9 @@ namespace Render {
         // clean up the renderer
         void cleanup();
 
-        // update the viewport and clear buffers
-        void viewport_clear(int width, int height);
+        // update the viewport
+        void resize_viewport(int width, int height);
+        void tick();
     private:
         inline static RendererGL* instance;
     };

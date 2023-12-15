@@ -1,4 +1,5 @@
 #include <cassert>
+#include <components/transform.h>
 #include <entities/entitymanager.h>
 
 namespace Entity {
@@ -31,7 +32,7 @@ namespace Entity {
         entities.clear();
     }
 
-    Entity* EntityManager::create_entity() {
+    uint32_t EntityManager::create_entity() {
         assert(entityCount < MAX_ENTITIES);
         uint32_t id = availableIds.front();
         availableIds.pop();
@@ -39,7 +40,10 @@ namespace Entity {
 
         entities.emplace(id, id);
 
-        return &entities.at(id);
+        // add a transform
+        entities.at(id).add_component<Component::Transform>();
+
+        return id;
     }
 
     void EntityManager::destroy_entity(uint32_t entityId) {
@@ -52,5 +56,14 @@ namespace Entity {
         Entity* result = nullptr;
         result = &entities.at(entityId);
         return result;
+    }
+
+    std::vector<uint32_t> EntityManager::get_active_ids() {
+        // TODO: this is probably piss slow
+        std::vector<uint32_t> ids;
+        for(auto &entity : entities) {
+            ids.push_back(entity.first);
+        }
+        return ids;
     }
 }

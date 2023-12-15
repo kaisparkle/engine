@@ -2,9 +2,7 @@
 #include <render/gl.h>
 #include <core/window.h>
 #include <ui/imgui.h>
-#include <render/gl.h>
 #include <core/engine.h>
-#include <components/transform.h>
 
 namespace Core {
     // create the Engine singleton
@@ -38,6 +36,8 @@ namespace Core {
         renderer->init();
         entityManager = Entity::EntityManager::create_instance();
         entityManager->init();
+        playerManager = Player::PlayerManager::create_instance();
+        playerManager->init();
     }
 
     // clean up the Engine
@@ -60,10 +60,11 @@ namespace Core {
             // process SDL events
             window->poll_events();
 
-            // update viewport, clear buffers
-            renderer->viewport_clear(window->get_window_width(), window->get_window_height());
+            // update viewport
+            renderer->resize_viewport(window->get_window_width(), window->get_window_height());
 
             // tick subsystems
+            renderer->tick();
             imgui->tick();
 
             // swap buffers

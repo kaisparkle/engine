@@ -18,17 +18,19 @@ namespace Entity {
         // return the EntityManager singleton
         static EntityManager* get_instance();
 
-        // initialize the Entity Manager
+        // initialize the EntityManager
         void init();
-        // clean up the Entity Manager
+        // clean up the EntityManager
         void cleanup();
 
-        // create a new entity - returns a pointer to it
-        Entity* create_entity();
+        // create a new entity - returns its ID
+        uint32_t create_entity();
         // destroy the entity with the given ID
         void destroy_entity(uint32_t entityId);
         // returns a pointer to the entity with given ID
         Entity* get_entity(uint32_t entityId);
+        // returns a vector of all active IDs
+        std::vector<uint32_t> get_active_ids();
     private:
         inline static EntityManager* instance;
 

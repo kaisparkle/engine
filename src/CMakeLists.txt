@@ -4,6 +4,7 @@ add_executable(${CMAKE_PROJECT_NAME}
         core/engine.h
         core/window.cpp
         core/window.h
+        core/vertex.h
         ui/imgui.cpp
         ui/imgui.h
         render/renderer.h
@@ -15,7 +16,12 @@ add_executable(${CMAKE_PROJECT_NAME}
         entities/entitymanager.h
         components/component.h
         components/transform.cpp
-        components/transform.h)
+        components/transform.h
+        components/mesh.h
+        components/camera.cpp
+        components/camera.h
+        player/playermanager.cpp
+        player/playermanager.h)
 
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>")
 

@@ -4,6 +4,7 @@
 #include <ui/imgui.h>
 #include <render/renderer.h>
 #include <entities/entitymanager.h>
+#include <player/playermanager.h>
 
 namespace Core {
     class Engine {
@@ -26,5 +27,6 @@ namespace Core {
         UI::IMGUI* imgui;
         Render::IRenderer* renderer;
         Entity::EntityManager* entityManager;
+        Player::PlayerManager* playerManager;
     };
 }
