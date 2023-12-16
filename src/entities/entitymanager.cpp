@@ -1,4 +1,5 @@
 #include <cassert>
+#include <optick.h>
 #include <components/transform.h>
 #include <entities/entitymanager.h>
 
@@ -33,6 +34,7 @@ namespace Entity {
     }
 
     uint32_t EntityManager::create_entity() {
+        OPTICK_EVENT();
         assert(entityCount < MAX_ENTITIES);
         uint32_t id = availableIds.front();
         availableIds.pop();
@@ -47,12 +49,14 @@ namespace Entity {
     }
 
     void EntityManager::destroy_entity(uint32_t entityId) {
+        OPTICK_EVENT();
         entities.erase(entityId);
         availableIds.push(entityId);
         entityCount--;
     }
 
     Entity* EntityManager::get_entity(uint32_t entityId) {
+        OPTICK_EVENT();
         Entity* result = nullptr;
         result = &entities.at(entityId);
         return result;
@@ -60,6 +64,7 @@ namespace Entity {
 
     std::vector<uint32_t> EntityManager::get_active_ids() {
         // TODO: this is probably piss slow
+        OPTICK_EVENT();
         std::vector<uint32_t> ids;
         for(auto &entity : entities) {
             ids.push_back(entity.first);

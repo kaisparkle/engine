@@ -22,6 +22,8 @@ namespace Core {
         inline static Engine* instance;
         bool isRunning = false;
 
+        double previousFrameTime = 0;
+
         // singletons
         Core::Window* window;
         UI::IMGUI* imgui;

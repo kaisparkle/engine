@@ -13,6 +13,7 @@ namespace Entity {
     }
 
     uint32_t Entity::get_id() {
+        OPTICK_EVENT();
         return id;
     }
 }

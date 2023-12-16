@@ -6,7 +6,7 @@
 #include <entities/entity.h>
 
 // TODO: cvars?
-#define MAX_ENTITIES 5000
+#define MAX_ENTITIES 16384
 
 namespace Entity {
     class EntityManager {

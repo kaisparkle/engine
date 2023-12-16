@@ -1,19 +1,28 @@
+#include <optick.h>
 #include <components/transform.h>
 
 namespace Component {
     Transform::Transform(Entity::Entity *entity) : IComponent(entity) {
         position = glm::vec3(0.0f, 0.0f, 0.0f);
-        rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+        rotation = glm::vec3(0.0f, 0.0f, 0.0f);
         scale = glm::vec3(1.0f, 1.0f, 1.0f);
     }
 
     glm::mat4 Transform::get_matrix() {
-        // convert to matrices
-        glm::mat4 transMat = glm::translate(glm::mat4(), position);
-        glm::mat4 rotMat = glm::mat4_cast(rotation);
-        glm::mat4 scaleMat = glm::scale(glm::mat4(), scale);
+        OPTICK_EVENT();
+        glm::mat4 matrix = glm::mat4{1.0f};
 
-        // multiply to get TRS matrix
-        return transMat * rotMat * scaleMat;
+        // translate
+        matrix = glm::translate(matrix, glm::vec3(position.x, position.y, position.z));
+
+        // rotate by each XYZ value
+        matrix = glm::rotate(matrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        matrix = glm::rotate(matrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        matrix = glm::rotate(matrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        // scale
+        matrix = glm::scale(matrix, glm::vec3(scale.x, scale.y, scale.z));
+
+        return matrix;
     }
 }

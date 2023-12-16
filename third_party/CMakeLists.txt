@@ -16,5 +16,7 @@ target_sources(imgui PRIVATE
         imgui/backends/imgui_impl_sdl2.cpp
 )
 
+add_subdirectory(assimp)
+
 target_include_directories(imgui PUBLIC imgui PUBLIC imgui/backends)
 target_link_libraries(imgui PUBLIC ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES})

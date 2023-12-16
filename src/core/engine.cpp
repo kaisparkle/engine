@@ -1,7 +1,12 @@
 #include <cassert>
+#include <chrono>
+#include <random>
+#include <optick.h>
 #include <render/gl.h>
 #include <core/window.h>
 #include <ui/imgui.h>
+#include <tools/modelimport.h>
+#include <components/mesh.h>
 #include <core/engine.h>
 
 namespace Core {
@@ -38,6 +43,8 @@ namespace Core {
         entityManager->init();
         playerManager = Player::PlayerManager::create_instance();
         playerManager->init();
+
+        Tools::import_model("../assets/sponza-gltf-pbr/sponza.glb");
     }
 
     // clean up the Engine
@@ -57,6 +64,12 @@ namespace Core {
     void Engine::run() {
         isRunning = true;
         while(isRunning) {
+            OPTICK_FRAME("MainThread");
+            OPTICK_EVENT();
+            auto frameTimerStart = std::chrono::high_resolution_clock::now();
+
+            Player::PlayerManager::get_instance()->get_player_camera()->process_keyboard(previousFrameTime, const_cast<uint8_t *>(SDL_GetKeyboardState(nullptr)));
+
             // process SDL events
             window->poll_events();
 
@@ -69,6 +82,10 @@ namespace Core {
 
             // swap buffers
             window->swap_buffers();
+
+            auto frameTimerEnd = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double, std::milli> frameDuration = frameTimerEnd - frameTimerStart;
+            previousFrameTime = frameDuration.count();
         }
     }
 

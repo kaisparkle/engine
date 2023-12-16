@@ -10,5 +10,7 @@ include_directories(${OPENGL_INCLUDE_DIRECTORIES})
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
+find_package(Optick 1.3 REQUIRED)
+
 add_subdirectory(third_party)
 add_subdirectory(src)

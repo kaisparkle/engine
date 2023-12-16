@@ -1,4 +1,5 @@
 #include <cassert>
+#include <optick.h>
 #include <entities/entitymanager.h>
 #include <components/camera.h>
 #include <core/window.h>
@@ -31,9 +32,11 @@ namespace Player {
 
         // set up the camera
         // TODO: cvars for defaults
-        float aspect = Core::Window::get_instance()->get_window_width() / Core::Window::get_instance()->get_window_height();
-        Entity::EntityManager::get_instance()->get_entity(entityId)->get_component<Component::Camera>()
-                ->update_projection(90.0f,aspect, 0.1f, 2000.0f);
+        float aspect = (float)Core::Window::get_instance()->get_window_width() / (float)Core::Window::get_instance()->get_window_height();
+        get_player_camera()->update_projection(90.0f,aspect, 0.1f, 10000.0f);
+
+        // move up a bit
+        get_player_transform()->position.y = 0.0f;
     }
 
     void PlayerManager::cleanup() {
@@ -41,6 +44,17 @@ namespace Player {
     }
 
     uint32_t PlayerManager::get_entity_id() {
+        OPTICK_EVENT();
         return entityId;
+    }
+
+    Component::Camera* PlayerManager::get_player_camera() {
+        OPTICK_EVENT();
+        return Entity::EntityManager::get_instance()->get_entity(entityId)->get_component<Component::Camera>();
+    }
+
+    Component::Transform *PlayerManager::get_player_transform() {
+        OPTICK_EVENT();
+        return Entity::EntityManager::get_instance()->get_entity(entityId)->get_component<Component::Transform>();
     }
 }

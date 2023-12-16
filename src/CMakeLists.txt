@@ -21,9 +21,11 @@ add_executable(${CMAKE_PROJECT_NAME}
         components/camera.cpp
         components/camera.h
         player/playermanager.cpp
-        player/playermanager.h)
+        player/playermanager.h
+        tools/modelimport.cpp
+        tools/modelimport.h)
 
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>")
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(${CMAKE_PROJECT_NAME} glad glm imgui SDL2 ${CMAKE_DL_LIBS})
+target_link_libraries(${CMAKE_PROJECT_NAME} glad glm imgui SDL2 assimp Optick::OptickCore ${CMAKE_DL_LIBS})

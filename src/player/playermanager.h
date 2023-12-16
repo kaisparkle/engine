@@ -1,6 +1,8 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
+#include <components/camera.h>
+#include <components/transform.h>
 
 namespace Player {
     class PlayerManager {
@@ -19,6 +21,10 @@ namespace Player {
 
         // get the player entity id
         uint32_t get_entity_id();
+        // get the player camera by pointer
+        Component::Camera* get_player_camera();
+        // get the player transform by pointer
+        Component::Transform* get_player_transform();
     private:
         inline static PlayerManager* instance;
 

@@ -1,8 +1,11 @@
 #include <cassert>
+#include <optick.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <ui/imgui.h>
 #include <core/engine.h>
+#include <player/playermanager.h>
+#include <components/camera.h>
 #include <core/window.h>
 
 namespace Core {
@@ -38,17 +41,17 @@ namespace Core {
 
         // set our flags
         // TODO: should load defaults from a config
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+        //SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+        //SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
         SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
 
         // create our window and GL context
-        handle = SDL_CreateWindow("fightan", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
+        handle = SDL_CreateWindow("engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
         assert(handle != nullptr);
         glContext = SDL_GL_CreateContext(handle);
         assert(glContext != nullptr);
@@ -56,6 +59,9 @@ namespace Core {
         // associate the context and window, and enable vsync
         SDL_GL_MakeCurrent(handle, glContext);
         SDL_GL_SetSwapInterval(1);
+
+        SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1", SDL_HINT_OVERRIDE);
+        SDL_SetRelativeMouseMode(SDL_TRUE);
     }
 
     // clean up the Window
@@ -87,18 +93,22 @@ namespace Core {
 
     // poll SDL events
     void Window::poll_events() {
+        OPTICK_EVENT();
         SDL_Event event;
         while(SDL_PollEvent(&event)) {
             UI::IMGUI::get_instance()->process_event(&event);
             switch(event.type) {
                 case SDL_QUIT:
                     Core::Engine::get_instance()->stop();
+                case SDL_MOUSEMOTION:
+                    Player::PlayerManager::get_instance()->get_player_camera()->process_mouse(event.motion.xrel, event.motion.yrel);
             }
         }
     }
 
     // swap the buffers
     void Window::swap_buffers() {
+        OPTICK_EVENT();
         SDL_GL_SwapWindow(handle);
     }
 }

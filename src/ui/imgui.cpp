@@ -1,4 +1,5 @@
 #include <cassert>
+#include <optick.h>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
@@ -47,11 +48,13 @@ namespace UI {
 
     // process SDL2 events
     void IMGUI::process_event(SDL_Event* event) {
+        OPTICK_EVENT();
         ImGui_ImplSDL2_ProcessEvent(event);
     }
 
     // draw the next frame
     void IMGUI::tick() {
+        OPTICK_EVENT();
         // start frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame();

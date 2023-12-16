@@ -11,6 +11,6 @@ namespace Component {
 
         std::vector<Core::Vertex> vertices;
         std::vector<unsigned int> indices;
-        void* api_objects;
+        void* api_objects = nullptr;
     };
 };
