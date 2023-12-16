@@ -4,7 +4,7 @@
 #include <optick.h>
 #include <render/gl.h>
 #include <core/window.h>
-#include <ui/imgui.h>
+#include <ui/editor.h>
 #include <tools/modelimport.h>
 #include <components/mesh.h>
 #include <core/engine.h>
@@ -35,29 +35,36 @@ namespace Core {
         // create and initialize subsystems
         window = Core::Window::create_instance();
         window->init();
-        imgui = UI::IMGUI::create_instance();
-        imgui->init();
+        editor = UI::Editor::create_instance();
+        editor->init();
         renderer = Render::RendererGL::create_instance();
         renderer->init();
         entityManager = Entity::EntityManager::create_instance();
         entityManager->init();
         playerManager = Player::PlayerManager::create_instance();
         playerManager->init();
+        deltatime = Core::DeltaTime::create_instance();
+        deltatime->init();
 
+        Tools::import_model("../assets/SciFiHelmet.gltf");
         Tools::import_model("../assets/sponza-gltf-pbr/sponza.glb");
     }
 
     // clean up the Engine
     void Engine::cleanup() {
         // cleanup and destroy subsystems
-        imgui->cleanup();
-        UI::IMGUI::destroy_instance();
+        editor->cleanup();
+        UI::Editor::destroy_instance();
         window->cleanup();
         Core::Window::destroy_instance();
         renderer->cleanup();
         Render::RendererGL::destroy_instance();
         entityManager->cleanup();
         Entity::EntityManager::destroy_instance();
+        playerManager->cleanup();
+        Player::PlayerManager::destroy_instance();
+        deltatime->cleanup();
+        Core::DeltaTime::destroy_instance();
     }
 
     // run the Engine, starts the game loop
@@ -66,9 +73,7 @@ namespace Core {
         while(isRunning) {
             OPTICK_FRAME("MainThread");
             OPTICK_EVENT();
-            auto frameTimerStart = std::chrono::high_resolution_clock::now();
-
-            Player::PlayerManager::get_instance()->get_player_camera()->process_keyboard(previousFrameTime, const_cast<uint8_t *>(SDL_GetKeyboardState(nullptr)));
+            deltatime->start_frame();
 
             // process SDL events
             window->poll_events();
@@ -78,14 +83,12 @@ namespace Core {
 
             // tick subsystems
             renderer->tick();
-            imgui->tick();
+            editor->tick();
 
             // swap buffers
             window->swap_buffers();
 
-            auto frameTimerEnd = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double, std::milli> frameDuration = frameTimerEnd - frameTimerStart;
-            previousFrameTime = frameDuration.count();
+            deltatime->end_frame();
         }
     }
 

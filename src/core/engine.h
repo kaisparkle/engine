@@ -1,7 +1,8 @@
 #pragma once
 
 #include <core/window.h>
-#include <ui/imgui.h>
+#include <core/deltatime.h>
+#include <ui/editor.h>
 #include <render/renderer.h>
 #include <entities/entitymanager.h>
 #include <player/playermanager.h>
@@ -22,13 +23,12 @@ namespace Core {
         inline static Engine* instance;
         bool isRunning = false;
 
-        double previousFrameTime = 0;
-
         // singletons
         Core::Window* window;
-        UI::IMGUI* imgui;
+        UI::Editor* editor;
         Render::IRenderer* renderer;
         Entity::EntityManager* entityManager;
         Player::PlayerManager* playerManager;
+        Core::DeltaTime* deltatime;
     };
 }

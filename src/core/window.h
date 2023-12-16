@@ -23,11 +23,13 @@ namespace Core {
         void swap_buffers();
     private:
         inline static Window* instance;
+
         SDL_Window* handle = nullptr;
         SDL_GLContext glContext = nullptr;
 
         // TODO: cvars?
         int window_width = 1600;
         int window_height = 900;
+        bool enableUI = false;
     };
 }

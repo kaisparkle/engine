@@ -10,3 +10,6 @@
 [submodule "third_party/assimp"]
 	path = third_party/assimp
 	url = https://github.com/assimp/assimp
+[submodule "third_party/implot"]
+	path = third_party/implot
+	url = https://github.com/epezent/implot

@@ -27,7 +27,10 @@ namespace Component {
 
     glm::mat4 Camera::get_view_matrix() {
         OPTICK_EVENT();
-        glm::vec3 position = Player::PlayerManager::get_instance()->get_player_transform()->position;
+        glm::vec3 position;
+        position.x = Player::PlayerManager::get_instance()->get_player_transform()->position[0];
+        position.y = Player::PlayerManager::get_instance()->get_player_transform()->position[1];
+        position.z = Player::PlayerManager::get_instance()->get_player_transform()->position[2];
         return glm::lookAt(position, position + front, up);
     }
 
@@ -59,7 +62,9 @@ namespace Component {
         if (keystate[SDL_SCANCODE_D]) position += right * vel;
         if (keystate[SDL_SCANCODE_Q]) position -= up * vel;
         if (keystate[SDL_SCANCODE_E]) position += up * vel;
-        Player::PlayerManager::get_instance()->get_player_transform()->position += position;
+        Player::PlayerManager::get_instance()->get_player_transform()->position[0] += position.x;
+        Player::PlayerManager::get_instance()->get_player_transform()->position[1] += position.y;
+        Player::PlayerManager::get_instance()->get_player_transform()->position[2] += position.z;
     }
 
     void Camera::update_vectors() {

@@ -35,6 +35,7 @@ namespace Tools {
     void process_assimp_mesh(aiMesh* mesh, const aiScene* scene) {
         uint32_t entId = Entity::EntityManager::get_instance()->create_entity();
         Entity::Entity* ent = Entity::EntityManager::get_instance()->get_entity(entId);
+        ent->set_name(std::string(mesh->mName.C_Str()));
         ent->add_component<Component::Mesh>();
         auto* meshComp = ent->get_component<Component::Mesh>();
 

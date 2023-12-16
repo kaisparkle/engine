@@ -14,6 +14,10 @@ namespace Entity {
 
         // returns this entity's ID
         uint32_t get_id();
+        // return this entity's name
+        const std::string& get_name();
+        // set this entity's name
+        void set_name(const std::string& newName);
 
         // add a new component of the given type
         template<typename ComponentType>
@@ -53,5 +57,6 @@ namespace Entity {
         // TODO: is a vector here a good idea?
         std::vector<Component::IComponent*> components;
         uint32_t id;
+        std::string name;
     };
 }

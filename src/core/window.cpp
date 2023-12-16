@@ -2,7 +2,7 @@
 #include <optick.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
-#include <ui/imgui.h>
+#include <ui/editor.h>
 #include <core/engine.h>
 #include <player/playermanager.h>
 #include <components/camera.h>
@@ -94,15 +94,38 @@ namespace Core {
     // poll SDL events
     void Window::poll_events() {
         OPTICK_EVENT();
+        // disable relative mouse if using UI currently
+        if(enableUI) {
+            SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "0", SDL_HINT_OVERRIDE);
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+        } else {
+            SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1", SDL_HINT_OVERRIDE);
+            SDL_SetRelativeMouseMode(SDL_TRUE);
+        }
+
         SDL_Event event;
         while(SDL_PollEvent(&event)) {
-            UI::IMGUI::get_instance()->process_event(&event);
+            if(enableUI) {
+                UI::Editor::get_instance()->process_event(&event);
+            }
             switch(event.type) {
                 case SDL_QUIT:
                     Core::Engine::get_instance()->stop();
+                    break;
                 case SDL_MOUSEMOTION:
-                    Player::PlayerManager::get_instance()->get_player_camera()->process_mouse(event.motion.xrel, event.motion.yrel);
+                    if(!enableUI) {
+                        Player::PlayerManager::get_instance()->get_player_camera()->process_mouse(
+                                event.motion.xrel, event.motion.yrel);
+                    }
+                    break;
+                case SDL_KEYDOWN:
+                        if(event.key.keysym.sym == SDLK_TAB) enableUI = !enableUI;
+                    break;
             }
+        }
+        if(!enableUI) {
+            Player::PlayerManager::get_instance()->get_player_camera()->process_keyboard(
+                    DeltaTime::get_instance()->get_delta_time(), const_cast<uint8_t *>(SDL_GetKeyboardState(nullptr)));
         }
     }
 

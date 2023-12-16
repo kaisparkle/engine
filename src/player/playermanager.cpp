@@ -26,6 +26,7 @@ namespace Player {
     void PlayerManager::init() {
         // create an entity for the player
         entityId = Entity::EntityManager::get_instance()->create_entity();
+        Entity::EntityManager::get_instance()->get_entity(entityId)->set_name("Player");
 
         // slap a camera on it
         Entity::EntityManager::get_instance()->get_entity(entityId)->add_component<Component::Camera>();
@@ -34,9 +35,6 @@ namespace Player {
         // TODO: cvars for defaults
         float aspect = (float)Core::Window::get_instance()->get_window_width() / (float)Core::Window::get_instance()->get_window_height();
         get_player_camera()->update_projection(90.0f,aspect, 0.1f, 10000.0f);
-
-        // move up a bit
-        get_player_transform()->position.y = 0.0f;
     }
 
     void PlayerManager::cleanup() {

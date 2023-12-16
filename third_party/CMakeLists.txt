@@ -16,7 +16,16 @@ target_sources(imgui PRIVATE
         imgui/backends/imgui_impl_sdl2.cpp
 )
 
-add_subdirectory(assimp)
-
 target_include_directories(imgui PUBLIC imgui PUBLIC imgui/backends)
 target_link_libraries(imgui PUBLIC ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES})
+
+add_library(implot STATIC)
+target_sources(implot PRIVATE
+        implot/implot.cpp
+        implot/implot_demo.cpp
+        implot/implot_items.cpp)
+
+target_include_directories(implot PUBLIC implot)
+target_link_libraries(implot PUBLIC imgui)
+
+add_subdirectory(assimp)
