@@ -6,7 +6,6 @@
 #include <core/window.h>
 #include <ui/editor.h>
 #include <tools/modelimport.h>
-#include <components/mesh.h>
 #include <core/engine.h>
 
 namespace Core {
@@ -45,9 +44,20 @@ namespace Core {
         playerManager->init();
         deltatime = Core::DeltaTime::create_instance();
         deltatime->init();
+        assetManager = Asset::AssetManager::create_instance();
+        assetManager->init();
 
-        Tools::import_model("../assets/SciFiHelmet.gltf");
-        Tools::import_model("../assets/sponza-gltf-pbr/sponza.glb");
+        auto* helmet = Tools::import_model("../assets/SciFiHelmet.gltf");
+        uint32_t helmetId = entityManager->create_entity()->get_id();
+        entityManager->get_entity(helmetId)->add_component<Component::Model>();
+        entityManager->get_entity(helmetId)->get_component<Component::Model>()->set_asset(helmet->get_id());
+        entityManager->get_entity(helmetId)->set_name(helmet->get_name());
+
+        auto* sponza = Tools::import_model("../assets/sponza-gltf-pbr/sponza.glb");
+        uint32_t sponzaId = entityManager->create_entity()->get_id();
+        entityManager->get_entity(sponzaId)->add_component<Component::Model>();
+        entityManager->get_entity(sponzaId)->get_component<Component::Model>()->set_asset(sponza->get_id());
+        entityManager->get_entity(sponzaId)->set_name(sponza->get_name());
     }
 
     // clean up the Engine

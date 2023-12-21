@@ -2,6 +2,7 @@
 #include <optick.h>
 #include <entities/entitymanager.h>
 #include <components/camera.h>
+#include <components/flycontroller.h>
 #include <core/window.h>
 #include <player/playermanager.h>
 
@@ -25,11 +26,12 @@ namespace Player {
 
     void PlayerManager::init() {
         // create an entity for the player
-        entityId = Entity::EntityManager::get_instance()->create_entity();
+        entityId = Entity::EntityManager::get_instance()->create_entity()->get_id();
         Entity::EntityManager::get_instance()->get_entity(entityId)->set_name("Player");
 
-        // slap a camera on it
+        // slap a camera and controller on it
         Entity::EntityManager::get_instance()->get_entity(entityId)->add_component<Component::Camera>();
+        Entity::EntityManager::get_instance()->get_entity(entityId)->add_component<Component::FlyController>();
 
         // set up the camera
         // TODO: cvars for defaults
@@ -54,5 +56,10 @@ namespace Player {
     Component::Transform *PlayerManager::get_player_transform() {
         OPTICK_EVENT();
         return Entity::EntityManager::get_instance()->get_entity(entityId)->get_component<Component::Transform>();
+    }
+
+    Component::IController *PlayerManager::get_player_controller() {
+        OPTICK_EVENT();
+        return Entity::EntityManager::get_instance()->get_entity(entityId)->get_component<Component::IController>();
     }
 }

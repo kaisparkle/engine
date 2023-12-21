@@ -1,3 +1,5 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include <cassert>
 #include <vector>
 #include <iostream>
@@ -6,9 +8,12 @@
 #include <optick.h>
 #include <glad/glad.h>
 #include <SDL.h>
+#include <stb_image.h>
 #include <entities/entitymanager.h>
 #include <player/playermanager.h>
-#include <components/mesh.h>
+#include <asset/assetmanager.h>
+#include <asset/model.h>
+#include <components/model.h>
 #include <components/transform.h>
 #include <components/camera.h>
 #include <render/gl.h>
@@ -76,58 +81,108 @@ namespace Render {
         std::vector<uint32_t> entityIds = Entity::EntityManager::get_instance()->get_active_ids();
         for(auto id : entityIds) {
             Entity::Entity* ent = Entity::EntityManager::get_instance()->get_entity(id);
-            if(ent->get_component<Component::Mesh>()) {
-                auto* mesh = ent->get_component<Component::Mesh>();
-                // check if api-specific objects created
-                if(!mesh->api_objects) {
-                    auto* objects = (MeshObjectsGL*)malloc(sizeof(MeshObjectsGL));
+            if(ent->get_component<Component::Model>()) {
+                uint32_t modelId = ent->get_component<Component::Model>()->get_asset();
+                auto* modelAsset = Asset::AssetManager::get_instance()->get_asset<Asset::Model>(modelId);
+                for(auto &mesh : modelAsset->meshes) {
+                    // check if api-specific objects created
+                    generate_mesh_objects(mesh);
+                    generate_texture_objects(mesh);
 
-                    // generate IDs
-                    glGenVertexArrays(1, &objects->VAO);
-                    glGenBuffers(1, &objects->VBO);
-                    glGenBuffers(1, &objects->EBO);
+                    // TODO: if the gfx API ever switches mid-execution you will not see the light of heaven
+                    auto* meshObjects = (MeshObjectsGL*)mesh->apiObjects;
+                    // shader binds
+                    defaultShader->bind();
+                    if(!mesh->textures.empty()) {
+                        glActiveTexture(GL_TEXTURE0);
+                        defaultShader->set_int("texture_diffuse", 0);
+                        auto* textureObjects = (TextureObjectsGL*)mesh->textures[0]->apiObjects;
+                        glBindTexture(GL_TEXTURE_2D, textureObjects->id);
+                    }
+                    // get model matrix and calculate MVP matrix
+                    glm::mat4 model = ent->get_component<Component::Transform>()->get_matrix();
+                    defaultShader->set_mat4("matrix_mvp", proj * view * model);
 
-                    // copy vertices
-                    glBindVertexArray(objects->VAO);
-                    glBindBuffer(GL_ARRAY_BUFFER, objects->VBO);
-                    glBufferData(GL_ARRAY_BUFFER, mesh->vertices.size() * sizeof(Core::Vertex), &mesh->vertices[0], GL_STATIC_DRAW);
-
-                    // copy indices
-                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, objects->EBO);
-                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->indices.size() * sizeof(unsigned int), &mesh->indices[0], GL_STATIC_DRAW);
-
-                    // set up attributes
-                    glEnableVertexAttribArray(0);
-                    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Core::Vertex), (void *) 0);
-                    // normals
-                    glEnableVertexAttribArray(1);
-                    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Core::Vertex), (void *) offsetof(Core::Vertex, normal));
-                    // uvs
-                    glEnableVertexAttribArray(2);
-                    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Core::Vertex), (void *) offsetof(Core::Vertex, uv));
-                    // tangents
-                    glEnableVertexAttribArray(3);
-                    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Core::Vertex), (void *) offsetof(Core::Vertex, tangent));
-                    // bitangents
-                    glEnableVertexAttribArray(4);
-                    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Core::Vertex), (void *) offsetof(Core::Vertex, bitangent));
-
+                    // draw
+                    glBindVertexArray(meshObjects->VAO);
+                    glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_INT, nullptr);
                     glBindVertexArray(0);
-                    mesh->api_objects = (void*)objects;
+                }
+            }
+        }
+    }
+
+    void RendererGL::generate_mesh_objects(Core::Mesh* mesh) {
+        if(!mesh->apiObjects) {
+            auto *objects = (MeshObjectsGL *) malloc(sizeof(MeshObjectsGL));
+
+            // generate IDs
+            glGenVertexArrays(1, &objects->VAO);
+            glGenBuffers(1, &objects->VBO);
+            glGenBuffers(1, &objects->EBO);
+
+            // copy vertices
+            glBindVertexArray(objects->VAO);
+            glBindBuffer(GL_ARRAY_BUFFER, objects->VBO);
+            glBufferData(GL_ARRAY_BUFFER, mesh->vertices.size() * sizeof(Core::Vertex), &mesh->vertices[0],
+                         GL_STATIC_DRAW);
+
+            // copy indices
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, objects->EBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->indices.size() * sizeof(unsigned int),
+                         &mesh->indices[0], GL_STATIC_DRAW);
+
+            // set up attributes
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Core::Vertex), (void *) 0);
+            // normals
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Core::Vertex),
+                                  (void *) offsetof(Core::Vertex, normal));
+            // uvs
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Core::Vertex),
+                                  (void *) offsetof(Core::Vertex, uv));
+            // tangents
+            glEnableVertexAttribArray(3);
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Core::Vertex),
+                                  (void *) offsetof(Core::Vertex, tangent));
+            // bitangents
+            glEnableVertexAttribArray(4);
+            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Core::Vertex),
+                                  (void *) offsetof(Core::Vertex, bitangent));
+
+            glBindVertexArray(0);
+            mesh->apiObjects = (void*)objects;
+        }
+    }
+
+    void RendererGL::generate_texture_objects(Core::Mesh *mesh) {
+        for(Asset::Texture* texture : mesh->textures) {
+            if(!texture->apiObjects) {
+                // load image data
+                int texWidth, texHeight, texChannels;
+                stbi_uc *pixels = stbi_load(texture->filePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+                if (!pixels) {
+                    std::cout << "Failed to load texture " << texture->filePath.c_str() << std::endl;
+                    return;
                 }
 
-                // TODO: if the gfx API ever switches mid-execution you will not see the light of heaven
-                auto* objects = (MeshObjectsGL*)mesh->api_objects;
-                // shader binds
-                defaultShader->bind();
-                // get model matrix and calculate MVP matrix
-                glm::mat4 model = ent->get_component<Component::Transform>()->get_matrix();
-                defaultShader->set_mat4("matrix_mvp", proj * view * model);
+                // generate and set params
+                auto* objects = (TextureObjectsGL*)malloc(sizeof(TextureObjectsGL));
+                GLenum format = GL_RGBA;
+                glGenTextures(1, &objects->id);
+                glBindTexture(GL_TEXTURE_2D, objects->id);
+                glTexImage2D(GL_TEXTURE_2D, 0, (GLint) format, texWidth, texHeight, 0, format, GL_UNSIGNED_BYTE, pixels);
+                glGenerateMipmap(GL_TEXTURE_2D);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
 
-                // draw
-                glBindVertexArray(objects->VAO);
-                glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_INT, nullptr);
-                glBindVertexArray(0);
+                stbi_image_free(pixels);
+                texture->apiObjects = (void*)objects;
             }
         }
     }

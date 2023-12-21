@@ -24,7 +24,7 @@ namespace Entity {
         void cleanup();
 
         // create a new entity - returns its ID
-        uint32_t create_entity();
+        Entity* create_entity();
         // destroy the entity with the given ID
         void destroy_entity(uint32_t entityId);
         // returns a pointer to the entity with given ID

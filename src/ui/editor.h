@@ -1,6 +1,8 @@
 #pragma once
 
+#include <vector>
 #include <SDL.h>
+#include <entities/entity.h>
 
 namespace UI {
     class Editor {
@@ -24,9 +26,13 @@ namespace UI {
     private:
         inline static Editor* instance;
 
+        Entity::Entity* activeSelection;
+
         // frametime plot
         void frametime_plot();
         // scene pane
         void scene_pane();
+        // inspector pane
+        void inspector_pane();
     };
 }

@@ -33,7 +33,7 @@ namespace Entity {
         entities.clear();
     }
 
-    uint32_t EntityManager::create_entity() {
+    Entity* EntityManager::create_entity() {
         OPTICK_EVENT();
         assert(entityCount < MAX_ENTITIES);
         uint32_t id = availableIds.front();
@@ -45,7 +45,7 @@ namespace Entity {
         // add a transform
         entities.at(id).add_component<Component::Transform>();
 
-        return id;
+        return &entities.at(id);
     }
 
     void EntityManager::destroy_entity(uint32_t entityId) {

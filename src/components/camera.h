@@ -14,9 +14,8 @@ namespace Component {
         glm::mat4 get_view_matrix();
         // get the projection matrix
         glm::mat4 get_projection_matrix();
-        // take in mouse input
-        void process_mouse(float dx, float dy);
-        void process_keyboard(double delta, const uint8_t *keystate);
+        // update the camera vectors
+        void update_vectors(glm::vec3 newUp, glm::vec3 newFront);
     private:
         glm::mat4 projection;
         float fov;
@@ -25,13 +24,5 @@ namespace Component {
         float far;
         glm::vec3 up;
         glm::vec3 front;
-        glm::vec3 right;
-        glm::vec3 worldUp;
-        float pitch;
-        float yaw;
-        float sensitivity;
-        float velocity;
-
-        void update_vectors();
     };
 }

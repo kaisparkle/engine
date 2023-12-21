@@ -1,10 +1,15 @@
 add_executable(${CMAKE_PROJECT_NAME}
         main.cpp
+        asset/asset.h
+        asset/assetmanager.cpp
+        asset/assetmanager.h
+        asset/model.h
         core/engine.cpp
         core/engine.h
         core/window.cpp
         core/window.h
         core/vertex.h
+        core/mesh.h
         core/deltatime.cpp
         core/deltatime.h
         ui/editor.cpp
@@ -19,9 +24,12 @@ add_executable(${CMAKE_PROJECT_NAME}
         components/component.h
         components/transform.cpp
         components/transform.h
-        components/mesh.h
+        components/model.cpp
+        components/model.h
         components/camera.cpp
         components/camera.h
+        components/flycontroller.cpp
+        components/flycontroller.h
         player/playermanager.cpp
         player/playermanager.h
         tools/modelimport.cpp
@@ -31,4 +39,4 @@ add_executable(${CMAKE_PROJECT_NAME}
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>")
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(${CMAKE_PROJECT_NAME} glad glm imgui implot SDL2 assimp Optick::OptickCore ${CMAKE_DL_LIBS})
+target_link_libraries(${CMAKE_PROJECT_NAME} glad glm imgui implot SDL2 assimp Optick::OptickCore stb ${CMAKE_DL_LIBS})

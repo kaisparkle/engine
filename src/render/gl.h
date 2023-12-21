@@ -3,9 +3,23 @@
 #include <glad/glad.h>
 #include <string>
 #include <glm/glm.hpp>
+#include <core/mesh.h>
 #include <render/renderer.h>
 
+// TODO: pull this in through glad
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+
 namespace Render {
+    struct MeshObjectsGL {
+        unsigned int VAO;
+        unsigned int VBO;
+        unsigned int EBO;
+    };
+
+    struct TextureObjectsGL {
+        unsigned int id;
+    };
+
     class ShaderGL {
     public:
         unsigned int programID;
@@ -44,14 +58,13 @@ namespace Render {
         inline static RendererGL* instance;
 
         ShaderGL* defaultShader;
+
+        // generate api-specific mesh objects for mesh
+        void generate_mesh_objects(Core::Mesh* mesh);
+        // generate api-specific texture objects for mesh
+        void generate_texture_objects(Core::Mesh* mesh);
     };
 
     void APIENTRY debug_output(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length,
                                const char *message, const void *userParam);
-
-    struct MeshObjectsGL {
-        unsigned int VAO;
-        unsigned int VBO;
-        unsigned int EBO;
-    };
 }

@@ -1,13 +1,12 @@
 #include <iostream>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
-#include <entities/entitymanager.h>
-#include <components/mesh.h>
+#include <asset/assetmanager.h>
 #include <core/vertex.h>
 #include <tools/modelimport.h>
 
 namespace Tools {
-    void import_model(const std::string &path) {
+    Asset::Model* import_model(const std::string &path) {
         Assimp::Importer importer;
         const aiScene* modelScene = importer.ReadFile(path,
                                                       aiProcess_Triangulate |
@@ -16,29 +15,29 @@ namespace Tools {
 
         if(!modelScene || modelScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !modelScene->mRootNode) {
             std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
-            return;
+            return nullptr;
         }
 
-        process_assimp_node(modelScene->mRootNode, modelScene);
+        auto* asset = Asset::AssetManager::get_instance()->create_asset<Asset::Model>(
+                aiScene::GetShortFilename(path.c_str()));
+
+        process_assimp_node(modelScene->mRootNode, modelScene, asset, path);
+
+        return asset;
     }
 
-    void process_assimp_node(aiNode* node, const aiScene* scene) {
+    void process_assimp_node(aiNode* node, const aiScene* scene, Asset::Model* model, const std::string &path) {
         for(size_t i = 0; i < node->mNumMeshes; i++) {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-            process_assimp_mesh(mesh, scene);
+            process_assimp_mesh(mesh, scene, model, path);
         }
         for(size_t i = 0; i < node->mNumChildren; i++) {
-            process_assimp_node(node->mChildren[i], scene);
+            process_assimp_node(node->mChildren[i], scene, model, path);
         }
     }
 
-    void process_assimp_mesh(aiMesh* mesh, const aiScene* scene) {
-        uint32_t entId = Entity::EntityManager::get_instance()->create_entity();
-        Entity::Entity* ent = Entity::EntityManager::get_instance()->get_entity(entId);
-        ent->set_name(std::string(mesh->mName.C_Str()));
-        ent->add_component<Component::Mesh>();
-        auto* meshComp = ent->get_component<Component::Mesh>();
-
+    void process_assimp_mesh(aiMesh* mesh, const aiScene* scene, Asset::Model* model, const std::string &path) {
+        auto* newMesh = new Core::Mesh;
         for(size_t i = 0; i < mesh->mNumVertices; i++) {
             Core::Vertex newVertex{};
             newVertex.position.x = mesh->mVertices[i].x;
@@ -61,13 +60,24 @@ namespace Tools {
                 newVertex.bitangent.y = mesh->mBitangents[i].y;
                 newVertex.bitangent.z = mesh->mBitangents[i].z;
             }
-            meshComp->vertices.push_back(newVertex);
+            newMesh->vertices.push_back(newVertex);
         }
         for (size_t i = 0; i < mesh->mNumFaces; i++) {
             aiFace face = mesh->mFaces[i];
             for (size_t j = 0; j < face.mNumIndices; j++) {
-                meshComp->indices.push_back(face.mIndices[j]);
+                newMesh->indices.push_back(face.mIndices[j]);
             }
         }
+
+        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+        if(material->GetTextureCount(aiTextureType_DIFFUSE)) {
+            aiString str;
+            material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
+            auto *texture = Asset::AssetManager::get_instance()->create_asset<Asset::Texture>(str.C_Str());
+            texture->filePath = path.substr(0, path.find_last_of('/')) + '/' + str.C_Str();
+            newMesh->textures.push_back(texture);
+        }
+
+        model->meshes.push_back(newMesh);
     }
 }

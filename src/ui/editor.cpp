@@ -39,6 +39,11 @@ namespace UI {
         // initialize dear imgui
         ImGui_ImplSDL2_InitForOpenGL(Core::Window::get_instance()->get_handle(), Core::Window::get_instance()->get_glcontext());
         ImGui_ImplOpenGL3_Init("#version 450");
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.Fonts->AddFontDefault();
+
+        activeSelection = nullptr;
     }
 
     void Editor::cleanup() {
@@ -62,6 +67,7 @@ namespace UI {
 
         frametime_plot();
         scene_pane();
+        inspector_pane();
 
         // render the frame
         ImGui::Render();
@@ -78,7 +84,7 @@ namespace UI {
         ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
                                        ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing |
                                        ImGuiWindowFlags_NoNav;
-        ImVec2 frametimeWindowPos = {0.0f + 10.0f, 0.0f + 10.0f};
+        ImVec2 frametimeWindowPos = {210.0f, 10.0f};
         ImGui::SetNextWindowPos(frametimeWindowPos);
         ImGui::Begin("Frametime Plot", nullptr, windowFlags);
         ImGui::PushItemWidth(500);
@@ -103,20 +109,50 @@ namespace UI {
             entities.push_back(Entity::EntityManager::get_instance()->get_entity(id));
         }
 
-        ImVec2 sceneWindowPos = {(float)Core::Window::get_instance()->get_window_width(), 0.0f};
-        ImVec2 sceneWindowPivot = {1.0f, 0.0f};
-        ImVec2 sceneWindowSize = {-1, ImGui::GetIO().DisplaySize.y};
+        ImVec2 sceneWindowPos = {0.0f, 0.0f};
+        ImVec2 sceneWindowPivot = {0.0f, 0.0f};
+        ImVec2 sceneWindowSize = {200, ImGui::GetIO().DisplaySize.y};
         ImGui::SetNextWindowPos(sceneWindowPos, 0, sceneWindowPivot);
         ImGui::SetNextWindowSize(sceneWindowSize);
         ImGui::Begin("Scene", nullptr);
         for (Entity::Entity* entity : entities) {
             std::string name = entity->get_name() + " (" + std::to_string(entity->get_id()) + ")";
-            auto* transform = entity->get_component<Component::Transform>();
-            if (ImGui::TreeNode(name.c_str())) {
-                ImGui::DragFloat3("Position", transform->position, 1.0f, 0.0f, 0.0f, "%.1f");
-                ImGui::DragFloat3("Rotation", transform->rotation, 1.0f, -360.0f, 360.0f, "%.1f deg");
-                ImGui::DragFloat3("Scale", transform->scale, 1.0f, 0.0f, 0.0f, "%.1f");
-                ImGui::TreePop();
+            const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth |
+                    ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                    ImGuiTreeNodeFlags_Leaf |
+                    (entity == activeSelection ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None);
+            ImGui::TreeNodeEx(name.c_str(), flags);
+            if(ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+                if(ImGui::IsItemHovered()) {
+                    activeSelection = entity;
+                }
+            }
+        }
+        ImGui::End();
+    }
+
+    void Editor::inspector_pane() {
+        ImVec2 inspectorWindowPos = {static_cast<float>(Core::Window::get_instance()->get_window_width()), 0.0f};
+        ImVec2 inspectorWindowPivot = {1.0f, 0.0f};
+        ImVec2 inspectorWindowSize = {350, ImGui::GetIO().DisplaySize.y};
+        ImGui::SetNextWindowPos(inspectorWindowPos, 0, inspectorWindowPivot);
+        ImGui::SetNextWindowSize(inspectorWindowSize);
+        ImGui::Begin("Inspector");
+        if(activeSelection) {
+            std::string name = activeSelection->get_name() + " (" + std::to_string(activeSelection->get_id()) + ")";
+            ImGui::Text("%s", name.c_str());
+            auto* transform = activeSelection->get_component<Component::Transform>();
+            if(transform) {
+                const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+                if(ImGui::TreeNodeEx("Components", flags)) {
+                    if (ImGui::TreeNodeEx("Transform", flags)) {
+                        ImGui::DragFloat3("Position", transform->position, 1.0f, 0.0f, 0.0f, "%.1f");
+                        ImGui::DragFloat3("Rotation", transform->rotation, 1.0f, -360.0f, 360.0f, "%.1f deg");
+                        ImGui::DragFloat3("Scale", transform->scale, 1.0f, 0.0f, 0.0f, "%.1f");
+                        ImGui::TreePop();
+                    }
+                    ImGui::TreePop();
+                }
             }
         }
         ImGui::End();

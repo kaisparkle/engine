@@ -114,7 +114,7 @@ namespace Core {
                     break;
                 case SDL_MOUSEMOTION:
                     if(!enableUI) {
-                        Player::PlayerManager::get_instance()->get_player_camera()->process_mouse(
+                        Player::PlayerManager::get_instance()->get_player_controller()->process_mouse(
                                 event.motion.xrel, event.motion.yrel);
                     }
                     break;
@@ -124,7 +124,7 @@ namespace Core {
             }
         }
         if(!enableUI) {
-            Player::PlayerManager::get_instance()->get_player_camera()->process_keyboard(
+            Player::PlayerManager::get_instance()->get_player_controller()->process_keyboard(
                     DeltaTime::get_instance()->get_delta_time(), const_cast<uint8_t *>(SDL_GetKeyboardState(nullptr)));
         }
     }

@@ -4,7 +4,11 @@
 #include <vector>
 #include <algorithm>
 #include <optick.h>
-#include <components/component.h>
+
+// forward declaration
+namespace Component {
+    class IComponent;
+}
 
 namespace Entity {
     class Entity {
@@ -21,9 +25,11 @@ namespace Entity {
 
         // add a new component of the given type
         template<typename ComponentType>
-        void add_component() {
+        ComponentType* add_component() {
             OPTICK_EVENT();
-            components.push_back(new ComponentType(this));
+            auto* component = new ComponentType(this);
+            components.push_back(component);
+            return component;
         }
 
         // destroy component of given type

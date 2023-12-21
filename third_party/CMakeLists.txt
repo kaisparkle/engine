@@ -28,4 +28,7 @@ target_sources(implot PRIVATE
 target_include_directories(implot PUBLIC implot)
 target_link_libraries(implot PUBLIC imgui)
 
+add_library(stb INTERFACE)
+target_include_directories(stb INTERFACE stb)
+
 add_subdirectory(assimp)

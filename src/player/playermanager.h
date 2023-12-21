@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <components/camera.h>
 #include <components/transform.h>
+#include <components/controller.h>
 
 namespace Player {
     class PlayerManager {
@@ -25,6 +26,8 @@ namespace Player {
         Component::Camera* get_player_camera();
         // get the player transform by pointer
         Component::Transform* get_player_transform();
+        // get the player controller by pointer
+        Component::IController* get_player_controller();
     private:
         inline static PlayerManager* instance;
 

@@ -1,3 +1,4 @@
+#include <components/component.h>
 #include <entities/entity.h>
 
 namespace Entity {
