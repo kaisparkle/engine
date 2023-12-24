@@ -2,7 +2,7 @@
 
 #include <string>
 #include <assimp/scene.h>
-#include <components/model.h>
+#include <component/model.h>
 
 namespace Tools {
     Asset::Model* import_model(const std::string &path);

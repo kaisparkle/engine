@@ -1,5 +1,5 @@
 #include <optick.h>
-#include <components/transform.h>
+#include <component/transform.h>
 
 namespace Component {
     Transform::Transform(Entity::Entity *entity) : IComponent(entity) {

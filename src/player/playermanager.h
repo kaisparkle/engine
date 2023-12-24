@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include <components/camera.h>
-#include <components/transform.h>
-#include <components/controller.h>
+#include <component/camera.h>
+#include <component/transform.h>
+#include <component/controller.h>
 
 namespace Player {
     class PlayerManager {

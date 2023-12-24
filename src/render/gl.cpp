@@ -9,13 +9,13 @@
 #include <glad/glad.h>
 #include <SDL.h>
 #include <stb_image.h>
-#include <entities/entitymanager.h>
+#include <entity/entitymanager.h>
 #include <player/playermanager.h>
 #include <asset/assetmanager.h>
 #include <asset/model.h>
-#include <components/model.h>
-#include <components/transform.h>
-#include <components/camera.h>
+#include <component/model.h>
+#include <component/transform.h>
+#include <component/camera.h>
 #include <render/gl.h>
 
 namespace Render {

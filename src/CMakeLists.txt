@@ -17,19 +17,19 @@ add_executable(${CMAKE_PROJECT_NAME}
         render/renderer.h
         render/gl.cpp
         render/gl.h
-        entities/entity.cpp
-        entities/entity.h
-        entities/entitymanager.cpp
-        entities/entitymanager.h
-        components/component.h
-        components/transform.cpp
-        components/transform.h
-        components/model.cpp
-        components/model.h
-        components/camera.cpp
-        components/camera.h
-        components/flycontroller.cpp
-        components/flycontroller.h
+        entity/entity.cpp
+        entity/entity.h
+        entity/entitymanager.cpp
+        entity/entitymanager.h
+        component/component.h
+        component/transform.cpp
+        component/transform.h
+        component/model.cpp
+        component/model.h
+        component/camera.cpp
+        component/camera.h
+        component/flycontroller.cpp
+        component/flycontroller.h
         player/playermanager.cpp
         player/playermanager.h
         tools/modelimport.cpp

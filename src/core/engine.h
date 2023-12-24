@@ -4,7 +4,7 @@
 #include <core/deltatime.h>
 #include <ui/editor.h>
 #include <render/renderer.h>
-#include <entities/entitymanager.h>
+#include <entity/entitymanager.h>
 #include <player/playermanager.h>
 #include <asset/assetmanager.h>
 

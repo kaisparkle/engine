@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <components/component.h>
+#include <component/component.h>
 
 namespace Component {
     class Transform : public IComponent {

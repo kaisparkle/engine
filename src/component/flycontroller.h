@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <components/controller.h>
+#include <component/controller.h>
 
 namespace Component {
     class FlyController : public IController {

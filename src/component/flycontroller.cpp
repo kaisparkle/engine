@@ -1,9 +1,9 @@
 #include <SDL.h>
 #include <glm/glm.hpp>
 #include <optick.h>
-#include <components/transform.h>
-#include <components/camera.h>
-#include <components/flycontroller.h>
+#include <component/transform.h>
+#include <component/camera.h>
+#include <component/flycontroller.h>
 
 namespace Component {
     FlyController::FlyController(Entity::Entity *entity) : IController(entity) {

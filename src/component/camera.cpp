@@ -2,7 +2,7 @@
 #include <glm/gtx/transform.hpp>
 #include <SDL.h>
 #include <player/playermanager.h>
-#include <components/camera.h>
+#include <component/camera.h>
 
 namespace Component {
     Camera::Camera(Entity::Entity *entity) : IComponent(entity) {

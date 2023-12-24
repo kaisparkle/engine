@@ -7,8 +7,8 @@
 #include <core/window.h>
 #include <core/deltatime.h>
 #include <tools/scrollingbuffer.h>
-#include <entities/entitymanager.h>
-#include <components/transform.h>
+#include <entity/entitymanager.h>
+#include <component/transform.h>
 #include <ui/editor.h>
 
 namespace UI {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <components/component.h>
+#include <component/component.h>
 
 namespace Component {
     class Camera : public IComponent {

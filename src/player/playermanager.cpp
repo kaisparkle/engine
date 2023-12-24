@@ -1,8 +1,8 @@
 #include <cassert>
 #include <optick.h>
-#include <entities/entitymanager.h>
-#include <components/camera.h>
-#include <components/flycontroller.h>
+#include <entity/entitymanager.h>
+#include <component/camera.h>
+#include <component/flycontroller.h>
 #include <core/window.h>
 #include <player/playermanager.h>
 

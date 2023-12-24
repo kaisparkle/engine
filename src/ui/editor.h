@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <SDL.h>
-#include <entities/entity.h>
+#include <entity/entity.h>
 
 namespace UI {
     class Editor {
