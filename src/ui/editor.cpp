@@ -1,6 +1,7 @@
 #include <cassert>
 #include <optick.h>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
 #include <implot.h>
@@ -9,6 +10,8 @@
 #include <tools/scrollingbuffer.h>
 #include <entity/entitymanager.h>
 #include <component/transform.h>
+#include <render/gl/apiobjects.h>
+#include <player/playermanager.h>
 #include <ui/editor.h>
 
 namespace UI {
@@ -29,19 +32,20 @@ namespace UI {
         return instance;
     }
 
-    void Editor::init() {
+    void Editor::init(Render::IFramebuffer* fb) {
+        framebuffer = fb;
         // set up dear imgui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImPlot::CreateContext();
         ImGui::StyleColorsDark();
 
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
         // initialize dear imgui
         ImGui_ImplSDL2_InitForOpenGL(Core::Window::get_instance()->get_handle(), Core::Window::get_instance()->get_glcontext());
         ImGui_ImplOpenGL3_Init("#version 450");
-
-        ImGuiIO& io = ImGui::GetIO();
-        io.Fonts->AddFontDefault();
 
         activeSelection = nullptr;
     }
@@ -64,14 +68,56 @@ namespace UI {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
+        ImGuiID dockspace = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
+        if(firstTick) {
+            firstTick = false;
+            init_docking(dockspace);
+        }
+
+        viewport();
         frametime_plot();
-        scene_pane();
+        hierarchy_pane();
         inspector_pane();
 
         // render the frame
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
+
+    void Editor::init_docking(ImGuiID dockspace) {
+        // clear existing nodes and create a new one
+        ImGui::DockBuilderRemoveNode(dockspace);
+        ImGui::DockBuilderAddNode(dockspace, ImGuiDockNodeFlags_DockSpace);
+        // use the whole window
+        ImGui::DockBuilderSetNodeSize(dockspace, ImGui::GetWindowSize());
+        // center node for the viewport
+        main = dockspace;
+        // split the center node to create a left dock node for hierarchy
+        leftTop = ImGui::DockBuilderSplitNode(main, ImGuiDir_Left, 0.75f, nullptr, &main);
+        // split the left panel node to dock the inspector underneath the hierarchy
+        leftBottom = ImGui::DockBuilderSplitNode(leftTop, ImGuiDir_Down, 0.5f, nullptr, &leftTop);
+        // dock all the windows and finish
+        ImGui::DockBuilderDockWindow("Viewport", main);
+        ImGui::DockBuilderDockWindow("Hierarchy", leftTop);
+        ImGui::DockBuilderDockWindow("Inspector", leftBottom);
+        ImGui::DockBuilderFinish(dockspace);
+    }
+
+    void Editor::viewport() {
+        ImGui::Begin("Viewport");
+        ImVec2 currentSize = ImGui::GetContentRegionAvail();
+        if(currentSize.x != viewportWidth || currentSize.y != viewportHeight) {
+            viewportWidth = currentSize.x;
+            viewportHeight = currentSize.y;
+            Player::PlayerManager::get_instance()->get_player_camera()->update_projection(90.0f, viewportWidth / viewportHeight, 0.1f, 10000.0f);
+            framebuffer->build(viewportWidth, viewportHeight);
+        }
+
+        auto* textureObjects = (Render::TextureObjectsGL*)framebuffer->texture->apiObjects;
+        ImGui::Image((void*)(intptr_t)textureObjects->id, currentSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+
+        ImGui::End();
     }
 
     void Editor::frametime_plot() {
@@ -84,7 +130,8 @@ namespace UI {
         ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
                                        ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing |
                                        ImGuiWindowFlags_NoNav;
-        ImVec2 frametimeWindowPos = {210.0f, 10.0f};
+        // lock to the top left corner of the viewport
+        ImVec2 frametimeWindowPos = {ImGui::DockBuilderGetNode(main)->Pos.x + 8.0f, ImGui::DockBuilderGetNode(main)->Pos.y + 27.0f};
         ImGui::SetNextWindowPos(frametimeWindowPos);
         ImGui::Begin("Frametime Plot", nullptr, windowFlags);
         ImGui::PushItemWidth(500);
@@ -93,7 +140,7 @@ namespace UI {
         if (ImPlot::BeginPlot("##Frametime Plot", ImVec2(500, 150))) {
             ImPlot::SetupAxes(nullptr, nullptr);
             ImPlot::SetupAxisLimits(ImAxis_X1, t - history, t, ImGuiCond_Always);
-            ImPlot::SetupAxisLimits(ImAxis_Y1, 5, 15);
+            ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 32);
             ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
             ImPlot::PlotLine("Frametime (ms)", &sdata.Data[0].x, &sdata.Data[0].y, sdata.Data.size(), 0, sdata.Offset,
                              2 * sizeof(float));
@@ -102,19 +149,14 @@ namespace UI {
         ImGui::End();
     }
 
-    void Editor::scene_pane() {
+    void Editor::hierarchy_pane() {
         std::vector<uint32_t> ids = Entity::EntityManager::get_instance()->get_active_ids();
         std::vector<Entity::Entity*> entities;
         for(uint32_t id : ids) {
             entities.push_back(Entity::EntityManager::get_instance()->get_entity(id));
         }
 
-        ImVec2 sceneWindowPos = {0.0f, 0.0f};
-        ImVec2 sceneWindowPivot = {0.0f, 0.0f};
-        ImVec2 sceneWindowSize = {200, ImGui::GetIO().DisplaySize.y};
-        ImGui::SetNextWindowPos(sceneWindowPos, 0, sceneWindowPivot);
-        ImGui::SetNextWindowSize(sceneWindowSize);
-        ImGui::Begin("Scene", nullptr);
+        ImGui::Begin("Hierarchy", nullptr);
         for (Entity::Entity* entity : entities) {
             std::string name = entity->get_name() + " (" + std::to_string(entity->get_id()) + ")";
             const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth |
@@ -132,11 +174,6 @@ namespace UI {
     }
 
     void Editor::inspector_pane() {
-        ImVec2 inspectorWindowPos = {static_cast<float>(Core::Window::get_instance()->get_window_width()), 0.0f};
-        ImVec2 inspectorWindowPivot = {1.0f, 0.0f};
-        ImVec2 inspectorWindowSize = {350, ImGui::GetIO().DisplaySize.y};
-        ImGui::SetNextWindowPos(inspectorWindowPos, 0, inspectorWindowPivot);
-        ImGui::SetNextWindowSize(inspectorWindowSize);
         ImGui::Begin("Inspector");
         if(activeSelection) {
             std::string name = activeSelection->get_name() + " (" + std::to_string(activeSelection->get_id()) + ")";
@@ -145,11 +182,10 @@ namespace UI {
             if(transform) {
                 const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
                 if(ImGui::TreeNodeEx("Components", flags)) {
-                    if (ImGui::TreeNodeEx("Transform", flags)) {
+                    if (ImGui::TreeNodeEx("Transform", flags | ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
                         ImGui::DragFloat3("Position", transform->position, 1.0f, 0.0f, 0.0f, "%.1f");
                         ImGui::DragFloat3("Rotation", transform->rotation, 1.0f, -360.0f, 360.0f, "%.1f deg");
                         ImGui::DragFloat3("Scale", transform->scale, 1.0f, 0.0f, 0.0f, "%.1f");
-                        ImGui::TreePop();
                     }
                     ImGui::TreePop();
                 }

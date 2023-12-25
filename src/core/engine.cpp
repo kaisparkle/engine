@@ -2,7 +2,7 @@
 #include <chrono>
 #include <random>
 #include <optick.h>
-#include <render/gl.h>
+#include <render/gl/renderer.h>
 #include <core/window.h>
 #include <ui/editor.h>
 #include <tools/modelimport.h>
@@ -34,10 +34,11 @@ namespace Core {
         // create and initialize subsystems
         window = Core::Window::create_instance();
         window->init();
-        editor = UI::Editor::create_instance();
-        editor->init();
         renderer = Render::RendererGL::create_instance();
         renderer->init();
+        renderer->resize_viewport(window->get_window_width(), window->get_window_height());
+        editor = UI::Editor::create_instance();
+        editor->init(renderer->get_framebuffer());
         entityManager = Entity::EntityManager::create_instance();
         entityManager->init();
         playerManager = Player::PlayerManager::create_instance();
@@ -87,9 +88,6 @@ namespace Core {
 
             // process SDL events
             window->poll_events();
-
-            // update viewport
-            renderer->resize_viewport(window->get_window_width(), window->get_window_height());
 
             // tick subsystems
             renderer->tick();

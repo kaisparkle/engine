@@ -16,7 +16,9 @@
 #include <component/model.h>
 #include <component/transform.h>
 #include <component/camera.h>
-#include <render/gl.h>
+#include <core/window.h>
+#include <render/gl/apiobjects.h>
+#include <render/gl/renderer.h>
 
 namespace Render {
     RendererGL* RendererGL::create_instance() {
@@ -55,20 +57,32 @@ namespace Render {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        framebuffer = new FramebufferGL;
     }
 
     void RendererGL::cleanup() {
         // do cleanup tasks
     }
 
+    IFramebuffer* RendererGL::get_framebuffer() {
+        return framebuffer;
+    }
+
     void RendererGL::resize_viewport(int width, int height) {
-        glViewport(0, 0, width, height);
+        framebuffer->build(width, height);
     }
 
     void RendererGL::tick() {
         OPTICK_EVENT();
         // clear viewport
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        glViewport(0, 0, Core::Window::get_instance()->get_window_width(), Core::Window::get_instance()->get_window_height());
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        // clear framebuffer
+        framebuffer->bind();
+        glViewport(0, 0, framebuffer->width, framebuffer->height);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glCullFace(GL_BACK);
 
@@ -96,7 +110,7 @@ namespace Render {
                     if(!mesh->textures.empty()) {
                         glActiveTexture(GL_TEXTURE0);
                         defaultShader->set_int("texture_diffuse", 0);
-                        auto* textureObjects = (TextureObjectsGL*)mesh->textures[0]->apiObjects;
+                        auto* textureObjects = (TextureObjectsGL*)mesh->textures[0]->texture.apiObjects;
                         glBindTexture(GL_TEXTURE_2D, textureObjects->id);
                     }
                     // get model matrix and calculate MVP matrix
@@ -110,6 +124,7 @@ namespace Render {
                 }
             }
         }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     void RendererGL::generate_mesh_objects(Core::Mesh* mesh) {
@@ -159,7 +174,7 @@ namespace Render {
 
     void RendererGL::generate_texture_objects(Core::Mesh *mesh) {
         for(Asset::Texture* texture : mesh->textures) {
-            if(!texture->apiObjects) {
+            if(!texture->texture.apiObjects) {
                 // load image data
                 int texWidth, texHeight, texChannels;
                 stbi_uc *pixels = stbi_load(texture->filePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -182,7 +197,7 @@ namespace Render {
                 glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
 
                 stbi_image_free(pixels);
-                texture->apiObjects = (void*)objects;
+                texture->texture.apiObjects = (void*)objects;
             }
         }
     }

@@ -1,8 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <imgui.h>
 #include <SDL.h>
 #include <entity/entity.h>
+#include <render/framebuffer.h>
 
 namespace UI {
     class Editor {
@@ -15,7 +17,7 @@ namespace UI {
         static Editor* get_instance();
 
         // initialize the Editor
-        void init();
+        void init(Render::IFramebuffer* fb);
         // clean up the Editor
         void cleanup();
 
@@ -27,11 +29,24 @@ namespace UI {
         inline static Editor* instance;
 
         Entity::Entity* activeSelection;
+        Render::IFramebuffer* framebuffer;
 
+        float viewportWidth;
+        float viewportHeight;
+
+        bool firstTick = true;
+
+        ImGuiID main, leftTop, leftBottom;
+
+        // initialize default docking layout
+        void init_docking(ImGuiID dockspace);
+
+        // viewport
+        void viewport();
         // frametime plot
         void frametime_plot();
-        // scene pane
-        void scene_pane();
+        // hierarchy pane
+        void hierarchy_pane();
         // inspector pane
         void inspector_pane();
     };

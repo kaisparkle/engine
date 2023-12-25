@@ -10,13 +10,18 @@ add_executable(${CMAKE_PROJECT_NAME}
         core/window.h
         core/vertex.h
         core/mesh.h
+        core/texture.h
         core/deltatime.cpp
         core/deltatime.h
         ui/editor.cpp
         ui/editor.h
         render/renderer.h
-        render/gl.cpp
-        render/gl.h
+        render/framebuffer.h
+        render/gl/apiobjects.h
+        render/gl/renderer.cpp
+        render/gl/renderer.h
+        render/gl/framebuffer.cpp
+        render/gl/framebuffer.h
         entity/entity.cpp
         entity/entity.h
         entity/entitymanager.cpp

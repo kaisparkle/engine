@@ -4,22 +4,13 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <core/mesh.h>
+#include <render/gl/framebuffer.h>
 #include <render/renderer.h>
 
 // TODO: pull this in through glad
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 
 namespace Render {
-    struct MeshObjectsGL {
-        unsigned int VAO;
-        unsigned int VBO;
-        unsigned int EBO;
-    };
-
-    struct TextureObjectsGL {
-        unsigned int id;
-    };
-
     class ShaderGL {
     public:
         unsigned int programID;
@@ -51,6 +42,7 @@ namespace Render {
         // clean up the renderer
         void cleanup();
 
+        IFramebuffer* get_framebuffer();
         // update the viewport
         void resize_viewport(int width, int height);
         void tick();
@@ -58,6 +50,7 @@ namespace Render {
         inline static RendererGL* instance;
 
         ShaderGL* defaultShader;
+        FramebufferGL* framebuffer;
 
         // generate api-specific mesh objects for mesh
         void generate_mesh_objects(Core::Mesh* mesh);

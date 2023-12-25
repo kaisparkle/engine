@@ -22,6 +22,7 @@ namespace Core {
         void stop();
     private:
         inline static Engine* instance;
+
         bool isRunning = false;
 
         // singletons
