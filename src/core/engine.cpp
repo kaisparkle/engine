@@ -6,6 +6,7 @@
 #include <core/window.h>
 #include <ui/editor.h>
 #include <tools/modelimport.h>
+#include <component/rigidbody.h>
 #include <core/engine.h>
 
 namespace Core {
@@ -47,18 +48,41 @@ namespace Core {
         deltatime->init();
         assetManager = Asset::AssetManager::create_instance();
         assetManager->init();
+        physicsManager = Physics::PhysicsManager::create_instance();
+        physicsManager->init();
 
-        auto* helmet = Tools::import_model("../assets/SciFiHelmet.gltf");
-        uint32_t helmetId = entityManager->create_entity()->get_id();
-        entityManager->get_entity(helmetId)->add_component<Component::Model>();
-        entityManager->get_entity(helmetId)->get_component<Component::Model>()->set_asset(helmet->get_id());
-        entityManager->get_entity(helmetId)->set_name(helmet->get_name());
+        auto* boxModel = Tools::import_model("../assets/Box.glb");
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> ydistr(0, 75.0);
+        std::uniform_real_distribution<float> xzdistr(-25.0, 25.0);
+        std::uniform_real_distribution<float> rotdistr(-360, 360);
+        for(size_t i = 0; i < 500; i++) {
+            Entity::Entity *box = entityManager->create_entity();
+            box->add_component<Component::Model>();
+            box->get_component<Component::Model>()->set_asset(boxModel->get_id());
+            box->get_component<Component::Transform>()->position[0] = xzdistr(gen);
+            box->get_component<Component::Transform>()->position[1] = ydistr(gen);
+            box->get_component<Component::Transform>()->position[2] = xzdistr(gen);
+            //box->get_component<Component::Transform>()->rotation[0] = rotdistr(gen);
+            //box->get_component<Component::Transform>()->rotation[1] = rotdistr(gen);
+            //box->get_component<Component::Transform>()->rotation[2] = rotdistr(gen);
+            //box->get_component<Component::Transform>()->scale[0] = 2.0f;
+            //box->get_component<Component::Transform>()->scale[1] = 2.0f;
+            //box->get_component<Component::Transform>()->scale[2] = 2.0f;
+            box->set_name(boxModel->get_name());
+            box->add_component<Component::RigidbodyDynamic>();
+        }
 
-        auto* sponza = Tools::import_model("../assets/sponza-gltf-pbr/sponza.glb");
-        uint32_t sponzaId = entityManager->create_entity()->get_id();
-        entityManager->get_entity(sponzaId)->add_component<Component::Model>();
-        entityManager->get_entity(sponzaId)->get_component<Component::Model>()->set_asset(sponza->get_id());
-        entityManager->get_entity(sponzaId)->set_name(sponza->get_name());
+        auto* sponzaModel = Tools::import_model("../assets/sponza-gltf-pbr/sponza.glb");
+        Entity::Entity* sponza = entityManager->create_entity();
+        sponza->add_component<Component::Model>();
+        sponza->get_component<Component::Model>()->set_asset(sponzaModel->get_id());
+        sponza->set_name(sponzaModel->get_name());
+        sponza->get_component<Component::Transform>()->scale[0] = 0.1f;
+        sponza->get_component<Component::Transform>()->scale[1] = 0.1f;
+        sponza->get_component<Component::Transform>()->scale[2] = 0.1f;
+        //sponza->add_component<Component::RigidbodyStatic>();
     }
 
     // clean up the Engine
@@ -90,6 +114,7 @@ namespace Core {
             window->poll_events();
 
             // tick subsystems
+            physicsManager->tick();
             renderer->tick();
             editor->tick();
 

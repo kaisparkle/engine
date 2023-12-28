@@ -37,6 +37,12 @@ namespace Player {
         // TODO: cvars for defaults
         float aspect = (float)Core::Window::get_instance()->get_window_width() / (float)Core::Window::get_instance()->get_window_height();
         get_player_camera()->update_projection(90.0f,aspect, 0.1f, 10000.0f);
+
+        get_player_transform()->position[0] = -50.0f;
+        get_player_transform()->position[1] = 10.0f;
+        get_player_transform()->rotation[1] = 0.0f;
+
+        get_player_controller()->process_mouse(0.0f, 0.0f);
     }
 
     void PlayerManager::cleanup() {

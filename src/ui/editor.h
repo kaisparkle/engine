@@ -49,5 +49,9 @@ namespace UI {
         void hierarchy_pane();
         // inspector pane
         void inspector_pane();
+
+        void check_position_update();
+        void check_rotation_update();
+        void check_scale_update();
     };
 }

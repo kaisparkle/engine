@@ -7,6 +7,7 @@
 #include <entity/entitymanager.h>
 #include <player/playermanager.h>
 #include <asset/assetmanager.h>
+#include <physics/physicsmanager.h>
 
 namespace Core {
     class Engine {
@@ -33,5 +34,6 @@ namespace Core {
         Player::PlayerManager* playerManager;
         Core::DeltaTime* deltatime;
         Asset::AssetManager* assetManager;
+        Physics::PhysicsManager* physicsManager;
     };
 }

@@ -12,6 +12,7 @@
 #include <component/transform.h>
 #include <render/gl/apiobjects.h>
 #include <player/playermanager.h>
+#include <physics/physicsmanager.h>
 #include <ui/editor.h>
 
 namespace UI {
@@ -63,7 +64,6 @@ namespace UI {
 
     void Editor::tick() {
         OPTICK_EVENT();
-
         // start frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame();
@@ -184,13 +184,34 @@ namespace UI {
                 if(ImGui::TreeNodeEx("Components", flags)) {
                     if (ImGui::TreeNodeEx("Transform", flags | ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
                         ImGui::DragFloat3("Position", transform->position, 1.0f, 0.0f, 0.0f, "%.1f");
+                        check_position_update();
                         ImGui::DragFloat3("Rotation", transform->rotation, 1.0f, -360.0f, 360.0f, "%.1f deg");
+                        check_rotation_update();
                         ImGui::DragFloat3("Scale", transform->scale, 1.0f, 0.0f, 0.0f, "%.1f");
+                        check_scale_update();
                     }
                     ImGui::TreePop();
                 }
             }
         }
         ImGui::End();
+    }
+
+    void Editor::check_position_update() {
+        if(ImGui::IsItemDeactivatedAfterEdit()) {
+            Physics::PhysicsManager::get_instance()->update_position(activeSelection->get_component<Component::Transform>());
+        }
+    }
+
+    void Editor::check_rotation_update() {
+        if(ImGui::IsItemDeactivatedAfterEdit()) {
+            Physics::PhysicsManager::get_instance()->update_rotation(activeSelection->get_component<Component::Transform>());
+        }
+    }
+
+    void Editor::check_scale_update() {
+        if(ImGui::IsItemDeactivatedAfterEdit()) {
+            Physics::PhysicsManager::get_instance()->update_scale(activeSelection->get_component<Component::Transform>());
+        }
     }
 }

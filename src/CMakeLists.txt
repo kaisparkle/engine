@@ -35,13 +35,19 @@ add_executable(${CMAKE_PROJECT_NAME}
         component/camera.h
         component/flycontroller.cpp
         component/flycontroller.h
+        component/rigidbody.cpp
+        component/rigidbody.h
         player/playermanager.cpp
         player/playermanager.h
         tools/modelimport.cpp
         tools/modelimport.h
-        tools/scrollingbuffer.h)
+        tools/scrollingbuffer.h
+        physics/physicsmanager.cpp
+        physics/physicsmanager.h
+        physics/internal.h
+        physics/layers.h)
 
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>")
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(${CMAKE_PROJECT_NAME} glad glm imgui implot SDL2 assimp Optick::OptickCore stb ${CMAKE_DL_LIBS})
+target_link_libraries(${CMAKE_PROJECT_NAME} glad glm imgui implot SDL2 assimp Optick::OptickCore stb Jolt ${CMAKE_DL_LIBS})

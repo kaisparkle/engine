@@ -8,7 +8,7 @@
 namespace Component {
     FlyController::FlyController(Entity::Entity *entity) : IController(entity) {
         // TODO: cvars
-        velocity = 100.0f;
+        velocity = 10.0f;
         sensitivity = 0.1f;
         cameraPitch = 0.0f;
         up = glm::vec3(0.0f, 1.0f, 0.0f);
