@@ -2,10 +2,6 @@
 #include <iostream>
 #include <component/transform.h>
 #include <physics/internal.h>
-#include <Jolt/Physics/Collision/Shape/MeshShape.h>
-#include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
-#include <Jolt/Renderer/DebugRenderer.h>
-#include <Jolt/Math/Mat44.h>
 #include <optick.h>
 #include <physics/physicsmanager.h>
 
