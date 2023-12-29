@@ -1,5 +1,4 @@
 #include <cassert>
-#include <chrono>
 #include <random>
 #include <optick.h>
 #include <render/gl/renderer.h>
@@ -7,6 +6,9 @@
 #include <ui/editor.h>
 #include <tools/modelimport.h>
 #include <component/rigidbody.h>
+#include <physics/collider/convexhull.h>
+#include <physics/collider/box.h>
+#include <physics/collider/mesh.h>
 #include <core/engine.h>
 
 namespace Core {
@@ -51,38 +53,48 @@ namespace Core {
         physicsManager = Physics::PhysicsManager::create_instance();
         physicsManager->init();
 
-        auto* boxModel = Tools::import_model("../assets/Box.glb");
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> ydistr(0, 75.0);
-        std::uniform_real_distribution<float> xzdistr(-25.0, 25.0);
-        std::uniform_real_distribution<float> rotdistr(-360, 360);
-        for(size_t i = 0; i < 500; i++) {
-            Entity::Entity *box = entityManager->create_entity();
-            box->add_component<Component::Model>();
-            box->get_component<Component::Model>()->set_asset(boxModel->get_id());
-            box->get_component<Component::Transform>()->position[0] = xzdistr(gen);
-            box->get_component<Component::Transform>()->position[1] = ydistr(gen);
-            box->get_component<Component::Transform>()->position[2] = xzdistr(gen);
-            //box->get_component<Component::Transform>()->rotation[0] = rotdistr(gen);
-            //box->get_component<Component::Transform>()->rotation[1] = rotdistr(gen);
-            //box->get_component<Component::Transform>()->rotation[2] = rotdistr(gen);
-            //box->get_component<Component::Transform>()->scale[0] = 2.0f;
-            //box->get_component<Component::Transform>()->scale[1] = 2.0f;
-            //box->get_component<Component::Transform>()->scale[2] = 2.0f;
-            box->set_name(boxModel->get_name());
-            box->add_component<Component::RigidbodyDynamic>();
-        }
+        Entity::Entity* floor = entityManager->create_entity();
+        floor->set_name("Floor");
+        floor->get_component<Component::Transform>()->position.y = -1.25f;
+        auto* floorBody = floor->add_component<Component::Rigidbody>();
+        auto* floorCollider = new Physics::Collider::BoxCollider(floorBody, glm::vec3(1000.0f, 1.0f, 1000.0f));
+        floorBody->add_collider(floorCollider);
+        floorBody->initialize();
 
         auto* sponzaModel = Tools::import_model("../assets/sponza-gltf-pbr/sponza.glb");
         Entity::Entity* sponza = entityManager->create_entity();
         sponza->add_component<Component::Model>();
         sponza->get_component<Component::Model>()->set_asset(sponzaModel->get_id());
         sponza->set_name(sponzaModel->get_name());
-        sponza->get_component<Component::Transform>()->scale[0] = 0.1f;
-        sponza->get_component<Component::Transform>()->scale[1] = 0.1f;
-        sponza->get_component<Component::Transform>()->scale[2] = 0.1f;
-        //sponza->add_component<Component::RigidbodyStatic>();
+        sponza->get_component<Component::Transform>()->scale = glm::vec3(0.1f, 0.1f, 0.1f);
+        auto* sponzaBody = sponza->add_component<Component::Rigidbody>();
+        for(auto mesh : sponzaModel->meshes) {
+            auto* collider = new Physics::Collider::MeshCollider(sponzaBody, mesh);
+            sponzaBody->add_collider(collider);
+        }
+        sponzaBody->initialize();
+
+        auto* boxModel = Tools::import_model("../assets/Box.glb");
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> ydistr(1, 75);
+        std::uniform_real_distribution<float> xzdistr(-50.0, 50.0);
+        std::uniform_real_distribution<float> rotdistr(-360, 360);
+        for(size_t i = 0; i < 1000; i++) {
+            Entity::Entity *box = entityManager->create_entity();
+            box->add_component<Component::Model>();
+            box->get_component<Component::Model>()->set_asset(boxModel->get_id());
+            box->get_component<Component::Transform>()->position = glm::vec3(xzdistr(gen), ydistr(gen), xzdistr(gen));
+            box->get_component<Component::Transform>()->rotation = glm::quat(glm::radians(glm::vec3(rotdistr(gen), rotdistr(gen), rotdistr(gen))));
+            box->set_name(boxModel->get_name());
+            auto* body = box->add_component<Component::Rigidbody>();
+            for(auto mesh : boxModel->meshes) {
+                auto* collider = new Physics::Collider::ConvexHullCollider(body, mesh);
+                body->add_collider(collider);
+            }
+            body->set_dynamic(true);
+            body->initialize();
+        }
     }
 
     // clean up the Engine

@@ -15,13 +15,6 @@ namespace Component {
     private:
         float sensitivity;
         float velocity;
-        float cameraPitch;
         glm::vec3 up;
-        glm::vec3 front;
-        glm::vec3 right;
-        glm::vec3 worldUp;
-
-        // update vectors
-        void update_vectors();
     };
 }

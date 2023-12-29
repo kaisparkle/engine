@@ -10,6 +10,7 @@
 #include <tools/scrollingbuffer.h>
 #include <entity/entitymanager.h>
 #include <component/transform.h>
+#include <component/rigidbody.h>
 #include <render/gl/apiobjects.h>
 #include <player/playermanager.h>
 #include <physics/physicsmanager.h>
@@ -75,6 +76,11 @@ namespace UI {
             init_docking(dockspace);
         }
 
+        if(activeSelection) {
+            update_selection_local();
+        }
+
+        menu_bar();
         viewport();
         frametime_plot();
         hierarchy_pane();
@@ -83,6 +89,8 @@ namespace UI {
         // render the frame
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        Physics::PhysicsManager::get_instance()->set_enabled(physicsEnabled);
     }
 
     void Editor::init_docking(ImGuiID dockspace) {
@@ -102,6 +110,16 @@ namespace UI {
         ImGui::DockBuilderDockWindow("Hierarchy", leftTop);
         ImGui::DockBuilderDockWindow("Inspector", leftBottom);
         ImGui::DockBuilderFinish(dockspace);
+    }
+
+    void Editor::menu_bar() {
+        if(ImGui::BeginMainMenuBar()) {
+            if(ImGui::BeginMenu("Systems")) {
+                ImGui::Checkbox("Physics", &physicsEnabled);
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
     }
 
     void Editor::viewport() {
@@ -167,6 +185,7 @@ namespace UI {
             if(ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
                 if(ImGui::IsItemHovered()) {
                     activeSelection = entity;
+                    update_selection_local();
                 }
             }
         }
@@ -183,12 +202,12 @@ namespace UI {
                 const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
                 if(ImGui::TreeNodeEx("Components", flags)) {
                     if (ImGui::TreeNodeEx("Transform", flags | ImGuiTreeNodeFlags_NoTreePushOnOpen)) {
-                        ImGui::DragFloat3("Position", transform->position, 1.0f, 0.0f, 0.0f, "%.1f");
-                        check_position_update();
-                        ImGui::DragFloat3("Rotation", transform->rotation, 1.0f, -360.0f, 360.0f, "%.1f deg");
-                        check_rotation_update();
-                        ImGui::DragFloat3("Scale", transform->scale, 1.0f, 0.0f, 0.0f, "%.1f");
-                        check_scale_update();
+                        ImGui::DragFloat3("Position", selectionPosition, 1.0f, 0.0f, 0.0f, "%.1f");
+                        update_selection_position();
+                        ImGui::DragFloat3("Rotation", selectionRotation, 1.0f, -360.0f, 360.0f, "%.1f deg");
+                        update_selection_rotation();
+                        ImGui::DragFloat3("Scale", selectionScale, 1.0f, 0.0f, 0.0f, "%.1f");
+                        update_selection_scale();
                     }
                     ImGui::TreePop();
                 }
@@ -197,21 +216,57 @@ namespace UI {
         ImGui::End();
     }
 
-    void Editor::check_position_update() {
-        if(ImGui::IsItemDeactivatedAfterEdit()) {
-            Physics::PhysicsManager::get_instance()->update_position(activeSelection->get_component<Component::Transform>());
+    void Editor::update_selection_position() {
+        glm::vec3 newPosition = glm::vec3(selectionPosition[0], selectionPosition[1], selectionPosition[2]);
+        activeSelection->get_component<Component::Transform>()->position = newPosition;
+        if(activeSelection->get_component<Component::Rigidbody>()) {
+            activeSelection->get_component<Component::Rigidbody>()->update_position();
         }
     }
 
-    void Editor::check_rotation_update() {
-        if(ImGui::IsItemDeactivatedAfterEdit()) {
-            Physics::PhysicsManager::get_instance()->update_rotation(activeSelection->get_component<Component::Transform>());
+    void Editor::update_selection_rotation() {
+        glm::quat newRotation = glm::quat(glm::radians(glm::vec3(selectionRotation[0], selectionRotation[1], selectionRotation[2])));
+        activeSelection->get_component<Component::Transform>()->rotation = newRotation;
+        if(activeSelection->get_component<Component::Rigidbody>()) {
+            activeSelection->get_component<Component::Rigidbody>()->update_rotation();
         }
     }
 
-    void Editor::check_scale_update() {
-        if(ImGui::IsItemDeactivatedAfterEdit()) {
-            Physics::PhysicsManager::get_instance()->update_scale(activeSelection->get_component<Component::Transform>());
+    void Editor::update_selection_scale() {
+        glm::vec3 newScale = glm::vec3(selectionScale[0], selectionScale[1], selectionScale[2]);
+        activeSelection->get_component<Component::Transform>()->scale = newScale;
+        if(activeSelection->get_component<Component::Rigidbody>()) {
+            activeSelection->get_component<Component::Rigidbody>()->update_scale();
+        }
+    }
+
+    void Editor::update_selection_local() {
+        // check if position needs to be updated
+        glm::vec3 localPosition = glm::vec3(selectionPosition[0], selectionPosition[1], selectionPosition[2]);
+        glm::vec3 currentPosition = activeSelection->get_component<Component::Transform>()->position;
+        if(localPosition != currentPosition) {
+            selectionPosition[0] = currentPosition.x;
+            selectionPosition[1] = currentPosition.y;
+            selectionPosition[2] = currentPosition.z;
+        }
+
+        // check if rotation needs to be updated - must compare quat to quat, not euler to euler
+        glm::quat localRotation = glm::quat(glm::radians(glm::vec3(selectionRotation[0], selectionRotation[1], selectionRotation[2])));
+        glm::quat currentRotation = activeSelection->get_component<Component::Transform>()->rotation;
+        if(localRotation != currentRotation) {
+            glm::vec3 rotation = glm::degrees(glm::eulerAngles(activeSelection->get_component<Component::Transform>()->rotation));
+            selectionRotation[0] = rotation.x;
+            selectionRotation[1] = rotation.y;
+            selectionRotation[2] = rotation.z;
+        }
+
+        // check if scale needs to be updated
+        glm::vec3 localScale = glm::vec3(selectionScale[0], selectionScale[1], selectionScale[2]);
+        glm::vec3 currentScale = activeSelection->get_component<Component::Transform>()->scale;
+        if(localScale != currentScale) {
+            selectionScale[0] = currentScale.x;
+            selectionScale[1] = currentScale.y;
+            selectionScale[2] = currentScale.z;
         }
     }
 }

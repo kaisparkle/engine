@@ -1,8 +1,7 @@
 #pragma once
 
 #include <map>
-#include <component/transform.h>
-#include <component/model.h>
+#include <physics/collider/collider.h>
 #include <physics/internal.h>
 
 namespace Physics {
@@ -20,13 +19,23 @@ namespace Physics {
         // clean up the PhysicsManager
         void cleanup();
 
+        // tick over the simulation state
         void tick();
 
-        void register_mesh(Component::Transform* transform, Core::Mesh* mesh, const std::string& type);
+        // register a new collider with the PhysicsManager, or replace an existing one
+        void register_collider(Collider::ICollider* collider, bool isDynamic);
 
-        void update_position(Component::Transform* transform);
-        void update_rotation(Component::Transform* transform);
-        void update_scale(Component::Transform* transform);
+        // update the position in the simulation with the position in the parent transform
+        void update_position(Collider::ICollider* collider);
+        // update the rotation in the simulation with the rotation in the parent transform
+        void update_rotation(Collider::ICollider* collider);
+        // update the scale in the simulation with the scale in the parent transform
+        void update_scale(Collider::ICollider* collider);
+
+        // activate all bodies in the simulation
+        void activate_all();
+
+        void set_enabled(bool enabled);
     private:
         inline static PhysicsManager* instance;
 
@@ -38,6 +47,8 @@ namespace Physics {
         ObjectVsBroadPhaseLayerFilterImpl* objectVsBroadPhaseLayerFilter;
         ObjectLayerPairFilterImpl* objectVsObjectLayerFilter;
 
-        std::map<Component::Transform*, JPH::BodyID> bodies;
+        bool physicsEnabled = false;
+
+        std::map<Collider::ICollider*, JPH::BodyID> bodies;
     };
 }

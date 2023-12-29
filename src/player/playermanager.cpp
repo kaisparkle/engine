@@ -40,7 +40,6 @@ namespace Player {
 
         get_player_transform()->position[0] = -50.0f;
         get_player_transform()->position[1] = 10.0f;
-        get_player_transform()->rotation[1] = 0.0f;
 
         get_player_controller()->process_mouse(0.0f, 0.0f);
     }

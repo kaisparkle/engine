@@ -1,28 +1,36 @@
 #include <physics/physicsmanager.h>
-#include <asset/assetmanager.h>
-#include <component/model.h>
 #include <component/rigidbody.h>
 
 namespace Component {
-    RigidbodyStatic::RigidbodyStatic(Entity::Entity *entity) : IComponent(entity) {
-        auto* modelComp = get_parent()->get_component<Component::Model>();
-        if(modelComp) {
-            auto* modelAsset = Asset::AssetManager::get_instance()->get_asset<Asset::Model>(modelComp->get_asset());
-            for(auto* mesh : modelAsset->meshes) {
-                Physics::PhysicsManager::get_instance()->register_mesh(
-                        get_parent()->get_component<Component::Transform>(), mesh, "static");
-            }
+    void Rigidbody::initialize() {
+        for(auto collider : colliders) {
+            Physics::PhysicsManager::get_instance()->register_collider(collider, isDynamic);
         }
     }
 
-    RigidbodyDynamic::RigidbodyDynamic(Entity::Entity *entity) : IComponent(entity) {
-        auto* modelComp = get_parent()->get_component<Component::Model>();
-        if(modelComp) {
-            auto* modelAsset = Asset::AssetManager::get_instance()->get_asset<Asset::Model>(modelComp->get_asset());
-            for(auto* mesh : modelAsset->meshes) {
-                Physics::PhysicsManager::get_instance()->register_mesh(
-                        get_parent()->get_component<Component::Transform>(), mesh, "dynamic");
-            }
+    void Rigidbody::add_collider(Physics::Collider::ICollider *collider) {
+        colliders.push_back(collider);
+    }
+
+    void Rigidbody::update_position() {
+        for(auto collider : colliders) {
+            Physics::PhysicsManager::get_instance()->update_position(collider);
         }
+    }
+
+    void Rigidbody::update_rotation() {
+        for(auto collider : colliders) {
+            Physics::PhysicsManager::get_instance()->update_rotation(collider);
+        }
+    }
+
+    void Rigidbody::update_scale() {
+        for(auto collider : colliders) {
+            Physics::PhysicsManager::get_instance()->update_scale(collider);
+        }
+    }
+
+    void Rigidbody::set_dynamic(bool dynamic) {
+        isDynamic = dynamic;
     }
 }

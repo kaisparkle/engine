@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <component/component.h>
 
 namespace Component {
@@ -14,15 +15,20 @@ namespace Component {
         glm::mat4 get_view_matrix();
         // get the projection matrix
         glm::mat4 get_projection_matrix();
+        // get the orientation quat
+        glm::quat get_orientation();
+        // offset camera angles
+        void offset_angles(float up, float right);
         // update the camera vectors
-        void update_vectors(glm::vec3 newUp, glm::vec3 newFront);
+        void update_vectors();
     private:
         glm::mat4 projection;
         float fov;
         float aspect;
         float near;
         float far;
-        glm::vec3 up;
-        glm::vec3 front;
+        glm::quat orientation;
+        float upAngle;
+        float rightAngle;
     };
 }

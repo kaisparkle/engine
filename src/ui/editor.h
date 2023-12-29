@@ -29,6 +29,10 @@ namespace UI {
         inline static Editor* instance;
 
         Entity::Entity* activeSelection;
+        float selectionPosition[3] = {0.0f, 0.0f, 0.0f};
+        float selectionRotation[3] = {0.0f, 0.0f, 0.0f};
+        float selectionScale[3] = {0.0f, 0.0f, 0.0f};
+
         Render::IFramebuffer* framebuffer;
 
         float viewportWidth;
@@ -36,11 +40,15 @@ namespace UI {
 
         bool firstTick = true;
 
+        bool physicsEnabled = false;
+
         ImGuiID main, leftTop, leftBottom;
 
         // initialize default docking layout
         void init_docking(ImGuiID dockspace);
 
+        // menu bar
+        void menu_bar();
         // viewport
         void viewport();
         // frametime plot
@@ -50,8 +58,14 @@ namespace UI {
         // inspector pane
         void inspector_pane();
 
-        void check_position_update();
-        void check_rotation_update();
-        void check_scale_update();
+        // update the selected item's transform position, and update the physics engine if applicable
+        void update_selection_position();
+        // update the selected item's transform rotation, and update the physics engine if applicable
+        void update_selection_rotation();
+        // update the selected item's transform scale, and update the physics engine if applicable
+        void update_selection_scale();
+
+        // update the local position/rotation/scale values if needed
+        void update_selection_local();
     };
 }

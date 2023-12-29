@@ -12,8 +12,8 @@ namespace Component {
         // returns a translation-rotation-scale matrix
         glm::mat4 get_matrix();
 
-        float position[3];
-        float rotation[3];
-        float scale[3];
+        glm::vec3 position;
+        glm::quat rotation;
+        glm::vec3 scale;
     };
 }

@@ -45,7 +45,14 @@ add_executable(${CMAKE_PROJECT_NAME}
         physics/physicsmanager.cpp
         physics/physicsmanager.h
         physics/internal.h
-        physics/layers.h)
+        physics/layers.h
+        physics/collider/collider.h
+        physics/collider/convexhull.cpp
+        physics/collider/convexhull.h
+        physics/collider/box.cpp
+        physics/collider/box.h
+        physics/collider/mesh.cpp
+        physics/collider/mesh.h)
 
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>")
 

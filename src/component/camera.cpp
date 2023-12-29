@@ -1,14 +1,15 @@
 #include <optick.h>
 #include <glm/gtx/transform.hpp>
-#include <SDL.h>
+#include <glm/gtx/quaternion.hpp>
 #include <player/playermanager.h>
 #include <component/camera.h>
 
 namespace Component {
     Camera::Camera(Entity::Entity *entity) : IComponent(entity) {
         update_projection(90.0f, (float)1600/(float)900, 0.1f, 10000.0f);
-        up = glm::vec3(0.0f, 1.0f, 0.0f);
-        front = glm::vec3(0.0f, 0.0f, -1.0f);
+        upAngle = 0.0f;
+        rightAngle = 90.0f;
+        update_vectors();
     }
 
     void Camera::update_projection(float fovDeg, float aspectRatio, float nearPlane, float farPlane) {
@@ -21,11 +22,11 @@ namespace Component {
 
     glm::mat4 Camera::get_view_matrix() {
         OPTICK_EVENT();
-        glm::vec3 position;
-        position.x = get_parent()->get_component<Component::Transform>()->position[0];
-        position.y = get_parent()->get_component<Component::Transform>()->position[1];
-        position.z = get_parent()->get_component<Component::Transform>()->position[2];
-        return glm::lookAt(position, position + front, up);
+        glm::vec3 position = get_parent()->get_component<Component::Transform>()->position;
+        glm::mat4 rotation = glm::toMat4(glm::conjugate(orientation));
+        glm::mat4 translation = glm::translate(glm::mat4(1.0f), -position);
+
+        return rotation * translation;
     }
 
     glm::mat4 Camera::get_projection_matrix() {
@@ -33,9 +34,21 @@ namespace Component {
         return projection;
     }
 
-    void Camera::update_vectors(glm::vec3 newUp, glm::vec3 newFront) {
+    glm::quat Camera::get_orientation() {
+        return orientation;
+    }
+
+    void Camera::offset_angles(float up, float right) {
+        upAngle += up;
+        rightAngle += right;
+    }
+
+    void Camera::update_vectors() {
         OPTICK_EVENT();
-        up = newUp;
-        front = newFront;
+        if(upAngle > 90.0f) upAngle = 90.0f;
+        if(upAngle < -90.0f) upAngle = -90.0f;
+        glm::quat aroundY = glm::angleAxis(glm::radians(-rightAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::quat aroundX = glm::angleAxis(glm::radians(-upAngle), glm::vec3(1.0f, 0.0f, 0.0f));
+        orientation = aroundY * aroundX;
     }
 }
