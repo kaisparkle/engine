@@ -53,10 +53,12 @@ namespace Physics {
         OPTICK_EVENT();
         if(!physicsEnabled) return;
 
+        // tick the physics system
         const float deltaTime = 1.0f / 60.0f;
         const uint collisionSteps = 1;
         physicsSystem.Update(deltaTime, collisionSteps, tempAllocator, jobSystem);
 
+        // update every body's transform component
         for(auto& body : bodies) {
             if(physicsSystem.GetBodyInterface().GetMotionType(body.second) != JPH::EMotionType::Static) {
                 auto* transform = body.first->get_parent()->get_parent()->get_component<Component::Transform>();
@@ -68,13 +70,20 @@ namespace Physics {
                 transform->rotation = glm::quat(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
             }
         }
+
+        // run post-sim for any character controllers
+        for(auto character : characters) {
+            character->PostSimulation(0.05f);
+        }
     }
 
     void PhysicsManager::register_collider(Collider::ICollider* collider, bool isDynamic) {
+        // if this collider is already registered, remove it
         if(bodies.find(collider) != bodies.end()) {
             physicsSystem.GetBodyInterface().RemoveBody(bodies.at(collider));
         }
 
+        // create the shape from the collider's settings
         JPH::ShapeSettings::ShapeResult shapeResult = collider->get_shape_settings()->Create();
         if (shapeResult.HasError()) {
             std::cout << shapeResult.GetError() << std::endl;
@@ -83,13 +92,16 @@ namespace Physics {
             std::cout << "Created shape" << std::endl;
         }
 
+        // convert the transform from glm to jolt
         auto* transform = collider->get_parent()->get_parent()->get_component<Component::Transform>();
         JPH::Vec3 position = {transform->position.x, transform->position.y, transform->position.z};
         JPH::Quat rotation = JPH::Quat(transform->rotation.x, transform->rotation.y, transform->rotation.z, transform->rotation.w);
         JPH::Vec3 scale = {transform->scale.x, transform->scale.y, transform->scale.z};
 
+        // scale the new shape by the transform scale
         JPH::ShapeRefC shape = shapeResult.Get()->ScaleShape(scale).Get();
 
+        // create the body
         JPH::Body *body;
         JPH::BodyCreationSettings* bodySettings;
         if(isDynamic) {
@@ -104,6 +116,7 @@ namespace Physics {
             physicsSystem.GetBodyInterface().AddBody(body->GetID(), JPH::EActivation::DontActivate);
         }
 
+        // store the body in the map
         bodies.emplace(collider, body->GetID());
         delete bodySettings;
     }
@@ -137,6 +150,14 @@ namespace Physics {
         for(auto& body : bodies) {
             physicsSystem.GetBodyInterface().ActivateBody(body.second);
         }
+    }
+
+    JPH::Character* PhysicsManager::create_character(JPH::CharacterSettings *settings, Collider::ICollider* collider, JPH::Vec3 position, JPH::Quat rotation) {
+        auto* character = new JPH::Character(settings, position, rotation, 0, &physicsSystem);
+        character->AddToPhysicsSystem(JPH::EActivation::Activate);
+        bodies.emplace(collider, character->GetBodyID());
+        characters.push_back(character);
+        return character;
     }
 
     void PhysicsManager::set_enabled(bool enabled) {

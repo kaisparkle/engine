@@ -35,6 +35,8 @@ add_executable(${CMAKE_PROJECT_NAME}
         component/camera.h
         component/flycontroller.cpp
         component/flycontroller.h
+        component/rigidbodycontroller.cpp
+        component/rigidbodycontroller.h
         component/rigidbody.cpp
         component/rigidbody.h
         player/playermanager.cpp
@@ -52,7 +54,9 @@ add_executable(${CMAKE_PROJECT_NAME}
         physics/collider/box.cpp
         physics/collider/box.h
         physics/collider/mesh.cpp
-        physics/collider/mesh.h)
+        physics/collider/mesh.h
+        physics/collider/capsule.cpp
+        physics/collider/capsule.h)
 
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>")
 

@@ -44,14 +44,14 @@ namespace Core {
         editor->init(renderer->get_framebuffer());
         entityManager = Entity::EntityManager::create_instance();
         entityManager->init();
-        playerManager = Player::PlayerManager::create_instance();
-        playerManager->init();
+        physicsManager = Physics::PhysicsManager::create_instance();
+        physicsManager->init();
         deltatime = Core::DeltaTime::create_instance();
         deltatime->init();
         assetManager = Asset::AssetManager::create_instance();
         assetManager->init();
-        physicsManager = Physics::PhysicsManager::create_instance();
-        physicsManager->init();
+        playerManager = Player::PlayerManager::create_instance();
+        playerManager->init();
 
         Entity::Entity* floor = entityManager->create_entity();
         floor->set_name("Floor");
@@ -66,7 +66,7 @@ namespace Core {
         sponza->add_component<Component::Model>();
         sponza->get_component<Component::Model>()->set_asset(sponzaModel->get_id());
         sponza->set_name(sponzaModel->get_name());
-        sponza->get_component<Component::Transform>()->scale = glm::vec3(0.1f, 0.1f, 0.1f);
+        sponza->get_component<Component::Transform>()->scale = glm::vec3(0.05f, 0.05f, 0.05f);
         auto* sponzaBody = sponza->add_component<Component::Rigidbody>();
         for(auto mesh : sponzaModel->meshes) {
             auto* collider = new Physics::Collider::MeshCollider(sponzaBody, mesh);
@@ -77,10 +77,10 @@ namespace Core {
         auto* boxModel = Tools::import_model("../assets/Box.glb");
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> ydistr(1, 75);
-        std::uniform_real_distribution<float> xzdistr(-50.0, 50.0);
+        std::uniform_real_distribution<float> ydistr(1, 30);
+        std::uniform_real_distribution<float> xzdistr(-25.0, 25.0);
         std::uniform_real_distribution<float> rotdistr(-360, 360);
-        for(size_t i = 0; i < 1000; i++) {
+        for(size_t i = 0; i < 250; i++) {
             Entity::Entity *box = entityManager->create_entity();
             box->add_component<Component::Model>();
             box->get_component<Component::Model>()->set_asset(boxModel->get_id());

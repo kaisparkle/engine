@@ -3,6 +3,7 @@
 #include <map>
 #include <physics/collider/collider.h>
 #include <physics/internal.h>
+#include <Jolt/Physics/Character/Character.h>
 
 namespace Physics {
     class PhysicsManager {
@@ -35,6 +36,9 @@ namespace Physics {
         // activate all bodies in the simulation
         void activate_all();
 
+        // create a character
+        JPH::Character* create_character(JPH::CharacterSettings* settings, Collider::ICollider* collider, JPH::Vec3 position, JPH::Quat rotation);
+
         void set_enabled(bool enabled);
     private:
         inline static PhysicsManager* instance;
@@ -50,5 +54,6 @@ namespace Physics {
         bool physicsEnabled = false;
 
         std::map<Collider::ICollider*, JPH::BodyID> bodies;
+        std::vector<JPH::Character*> characters;
     };
 }

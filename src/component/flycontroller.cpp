@@ -10,7 +10,8 @@ namespace Component {
         // TODO: cvars
         velocity = 10.0f;
         sensitivity = 0.1f;
-        up = glm::vec3(0.0f, 1.0f, 0.0f);
+        pitch = 0.0f;
+        yaw = 0.0f;
     }
 
     void FlyController::process_mouse(float dx, float dy) {
@@ -19,17 +20,18 @@ namespace Component {
         dx *= sensitivity;
         dy *= sensitivity;
 
-        // offset the camera angles and update vectors
-        get_parent()->get_component<Component::Camera>()->offset_angles(dy, dx);
-        get_parent()->get_component<Component::Camera>()->update_vectors();
+        pitch += -dy;
+        if(pitch > 89.9f) pitch = 89.9f;
+        if(pitch < -89.9f) pitch = -89.9f;
+        yaw += dx;
+
+        get_parent()->get_component<Component::Camera>()->update_vectors(pitch, yaw);
     }
 
     void FlyController::process_keyboard(double delta, const uint8_t *keystate) {
-        OPTICK_EVENT();
-        glm::quat orientation = get_parent()->get_component<Component::Camera>()->get_orientation();
-        glm::quat frontQuat = orientation * glm::quat(0.0f, 0.0f, 0.0f, -1.0f) * glm::conjugate(orientation);
-        glm::vec3 front = glm::vec3(frontQuat.x, frontQuat.y, frontQuat.z);
-        glm::vec3 right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
+        glm::vec3 front = get_parent()->get_component<Component::Camera>()->get_front();
+        glm::vec3 right = get_parent()->get_component<Component::Camera>()->get_right();
+        glm::vec3 up = get_parent()->get_component<Component::Camera>()->get_up();
 
         auto vel = (float) (velocity * (delta / 1000));
         glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
