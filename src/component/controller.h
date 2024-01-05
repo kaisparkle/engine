@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <components/component.h>
+#include <component/component.h>
 
 namespace Component {
     class IController : public IComponent {

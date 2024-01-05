@@ -1,8 +1,10 @@
 #include <cassert>
 #include <optick.h>
-#include <entities/entitymanager.h>
-#include <components/camera.h>
-#include <components/flycontroller.h>
+#include <entity/entitymanager.h>
+#include <component/camera.h>
+#include <component/flycontroller.h>
+#include <component/rigidbodycontroller.h>
+#include <component/rigidbody.h>
 #include <core/window.h>
 #include <player/playermanager.h>
 
@@ -29,14 +31,21 @@ namespace Player {
         entityId = Entity::EntityManager::get_instance()->create_entity()->get_id();
         Entity::EntityManager::get_instance()->get_entity(entityId)->set_name("Player");
 
+        get_player_transform()->position[0] = -50.0f;
+        get_player_transform()->position[1] = 10.0f;
+
         // slap a camera and controller on it
         Entity::EntityManager::get_instance()->get_entity(entityId)->add_component<Component::Camera>();
-        Entity::EntityManager::get_instance()->get_entity(entityId)->add_component<Component::FlyController>();
+        Entity::EntityManager::get_instance()->get_entity(entityId)->add_component<Component::Rigidbody>();
+        Entity::EntityManager::get_instance()->get_entity(entityId)->add_component<Component::RigidbodyController>();
+        //Entity::EntityManager::get_instance()->get_entity(entityId)->add_component<Component::FlyController>();
 
         // set up the camera
         // TODO: cvars for defaults
         float aspect = (float)Core::Window::get_instance()->get_window_width() / (float)Core::Window::get_instance()->get_window_height();
         get_player_camera()->update_projection(90.0f,aspect, 0.1f, 10000.0f);
+
+        get_player_controller()->process_mouse(0.0f, 0.0f);
     }
 
     void PlayerManager::cleanup() {

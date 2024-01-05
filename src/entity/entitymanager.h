@@ -3,7 +3,7 @@
 #include <string>
 #include <queue>
 #include <map>
-#include <entities/entity.h>
+#include <entity/entity.h>
 
 // TODO: cvars?
 #define MAX_ENTITIES 16384

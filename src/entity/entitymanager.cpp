@@ -1,7 +1,7 @@
 #include <cassert>
 #include <optick.h>
-#include <components/transform.h>
-#include <entities/entitymanager.h>
+#include <component/transform.h>
+#include <entity/entitymanager.h>
 
 namespace Entity {
     EntityManager* EntityManager::create_instance() {

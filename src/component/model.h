@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <asset/model.h>
-#include <components/component.h>
+#include <component/component.h>
 
 namespace Component {
     class Model : public IComponent {

@@ -1,5 +1,5 @@
-#include <components/component.h>
-#include <entities/entity.h>
+#include <component/component.h>
+#include <entity/entity.h>
 
 namespace Entity {
     Entity::Entity(uint32_t entityId) {

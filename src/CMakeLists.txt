@@ -10,33 +10,55 @@ add_executable(${CMAKE_PROJECT_NAME}
         core/window.h
         core/vertex.h
         core/mesh.h
+        core/texture.h
         core/deltatime.cpp
         core/deltatime.h
         ui/editor.cpp
         ui/editor.h
         render/renderer.h
-        render/gl.cpp
-        render/gl.h
-        entities/entity.cpp
-        entities/entity.h
-        entities/entitymanager.cpp
-        entities/entitymanager.h
-        components/component.h
-        components/transform.cpp
-        components/transform.h
-        components/model.cpp
-        components/model.h
-        components/camera.cpp
-        components/camera.h
-        components/flycontroller.cpp
-        components/flycontroller.h
+        render/framebuffer.h
+        render/gl/apiobjects.h
+        render/gl/renderer.cpp
+        render/gl/renderer.h
+        render/gl/framebuffer.cpp
+        render/gl/framebuffer.h
+        entity/entity.cpp
+        entity/entity.h
+        entity/entitymanager.cpp
+        entity/entitymanager.h
+        component/component.h
+        component/transform.cpp
+        component/transform.h
+        component/model.cpp
+        component/model.h
+        component/camera.cpp
+        component/camera.h
+        component/flycontroller.cpp
+        component/flycontroller.h
+        component/rigidbodycontroller.cpp
+        component/rigidbodycontroller.h
+        component/rigidbody.cpp
+        component/rigidbody.h
         player/playermanager.cpp
         player/playermanager.h
         tools/modelimport.cpp
         tools/modelimport.h
-        tools/scrollingbuffer.h)
+        tools/scrollingbuffer.h
+        physics/physicsmanager.cpp
+        physics/physicsmanager.h
+        physics/internal.h
+        physics/layers.h
+        physics/collider/collider.h
+        physics/collider/convexhull.cpp
+        physics/collider/convexhull.h
+        physics/collider/box.cpp
+        physics/collider/box.h
+        physics/collider/mesh.cpp
+        physics/collider/mesh.h
+        physics/collider/capsule.cpp
+        physics/collider/capsule.h)
 
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>")
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(${CMAKE_PROJECT_NAME} glad glm imgui implot SDL2 assimp Optick::OptickCore stb ${CMAKE_DL_LIBS})
+target_link_libraries(${CMAKE_PROJECT_NAME} glad glm imgui implot SDL2 assimp Optick::OptickCore stb Jolt ${CMAKE_DL_LIBS})

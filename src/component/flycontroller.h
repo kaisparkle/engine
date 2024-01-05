@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <components/controller.h>
+#include <component/controller.h>
 
 namespace Component {
     class FlyController : public IController {
@@ -13,15 +13,9 @@ namespace Component {
         // take in keyboard input
         void process_keyboard(double delta, const uint8_t *keystate);
     private:
+        float pitch;
+        float yaw;
         float sensitivity;
         float velocity;
-        float cameraPitch;
-        glm::vec3 up;
-        glm::vec3 front;
-        glm::vec3 right;
-        glm::vec3 worldUp;
-
-        // update vectors
-        void update_vectors();
     };
 }

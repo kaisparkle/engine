@@ -1,7 +1,7 @@
 #include <typeinfo>
 #include <asset/model.h>
 #include <asset/assetmanager.h>
-#include <components/model.h>
+#include <component/model.h>
 
 namespace Component {
     uint32_t Model::get_asset() {

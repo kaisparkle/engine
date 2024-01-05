@@ -1,11 +1,9 @@
 #include <cassert>
 #include <optick.h>
 #include <SDL.h>
-#include <SDL_opengl.h>
 #include <ui/editor.h>
 #include <core/engine.h>
 #include <player/playermanager.h>
-#include <components/camera.h>
 #include <core/window.h>
 
 namespace Core {
@@ -45,10 +43,10 @@ namespace Core {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-        //SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-        //SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-        SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+        auto flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
 
         // create our window and GL context
         handle = SDL_CreateWindow("engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
